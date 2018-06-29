@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">WorkTime</string>
+    <string name="start_time">Start time</string>
+    <string name="stop_time">Stop time</string>
+    <string name="time_in">Time in</string>
+    <string name="time_out">Time out</string>
+    <string name="over_time">Over time</string>
+    <string name="default_value">--:--</string>
+    <string name="start">Start</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="reset">Reset</string>
+    <string name="work_day">Work day: </string>
+</resources>
