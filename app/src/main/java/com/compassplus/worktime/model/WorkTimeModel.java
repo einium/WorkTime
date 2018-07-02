@@ -2,14 +2,15 @@ package com.compassplus.worktime.model;
 
 import android.os.Handler;
 import android.util.Log;
-
-import com.compassplus.worktime.Preference;
 import com.compassplus.worktime.viewmodel.WorkTimeViewModel;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class WorkTimeModel {
     private static WorkTimeModel currentModel;
+
     public static WorkTimeModel getInstance(){
         if (currentModel == null) {
             currentModel = new WorkTimeModel();
@@ -19,7 +20,7 @@ public class WorkTimeModel {
     }
 
     private long customWorkTime = 0;
-    private WorkTimeViewModel.IChangeTimeListener listener;
+    private List<WorkTimeViewModel.IChangeTimeListener> listeners = new ArrayList<>();
     private Handler handler;
     private Runnable workTimeRunnable;
     private Runnable timeOutRunnable;
@@ -36,52 +37,21 @@ public class WorkTimeModel {
     private long currentTimeOut;
     private long currentTimeOutStartTime;
 
-    public void loadState(Preference pref, final WorkTimeViewModel.IChangeTimeListener listener){
-        this.listener = listener;
-        boolean isStateSaved = pref.loadSavedState();
-        if (isStateSaved) {
-            Log.d("logtag", "State loaded");
-            isStarted = true;
-            isPaused = pref.loadPaused();
-            currentStartTime = pref.loadCurrentStartTime();
-            commonWorkTime = pref.loadCommonWorkTime();
-            commonTimeOut = pref.loadCommonTimeOut();
-            currentTimeOutStartTime = pref.loadCurrentTimeOutStartTime();
-            customWorkTime = pref.loadCustomWorkTime();
-            if (isPaused){
-                currentWorkTime = 0;
-                currentTimeOut = System.currentTimeMillis() - currentTimeOutStartTime;
-            } else {
-                currentWorkTime = System.currentTimeMillis() - currentStartTime;
-                currentTimeOut = 0;
-            }
-
-            if (commonWorkTime + currentWorkTime > getWorkDayInMillis()){
-                overTime = commonWorkTime + currentWorkTime - getWorkDayInMillis();
-            }
-
-            if (isPaused){
-                handler.postDelayed(timeOutRunnable, 0);
-            } else {
-                handler.postDelayed(workTimeRunnable, 0);
-            }
-        } else {
-            Log.d("logtag", "State not loaded");
-            //create new state
-            isStarted = false;
-            isPaused = false;
-            commonWorkTime = 0;
-            currentWorkTime = 0;
-
-            currentTimeOutStartTime = 0;
-            commonTimeOut = 0;
-            currentTimeOut = 0;
-
-            overTime = 0;
-        }
-
+    public WorkTimeModel() {
+        isStarted = false;
+        isPaused = false;
+        commonWorkTime = 0;
+        currentWorkTime = 0;
+        currentTimeOutStartTime = 0;
+        commonTimeOut = 0;
+        currentTimeOut = 0;
+        overTime = 0;
         handler = new Handler();
         createRunnables();
+    }
+
+    public void addListener(WorkTimeViewModel.IChangeTimeListener listener){
+        listeners.add(listener);
     }
 
     private void createRunnables() {
@@ -90,11 +60,16 @@ public class WorkTimeModel {
             public void run() {
                 if (isStarted && !isPaused) {
                     long curTime = System.currentTimeMillis();
-                    currentWorkTime = curTime-currentStartTime;
-                    listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
-                    if (commonWorkTime + currentWorkTime > getWorkDayInMillis()){
+                    currentWorkTime = curTime - currentStartTime;
+                    for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
+                        listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
+                    }
+
+                    if (commonWorkTime + currentWorkTime > getWorkDayInMillis()) {
                         overTime = commonWorkTime + currentWorkTime - getWorkDayInMillis();
-                        listener.OnOverTimeChange(overTime);
+                        for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
+                            listener.OnOverTimeChange(overTime);
+                        }
                     }
                     handler.postDelayed(workTimeRunnable, 970);
                 }
@@ -106,9 +81,13 @@ public class WorkTimeModel {
                 if (isStarted && isPaused) {
                     long curTime = System.currentTimeMillis();
                     currentTimeOut = curTime-currentTimeOutStartTime;
-                    listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
+                    for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
+                        listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
+                    }
                     if (overTime == 0){
-                        listener.OnStopTimeChange(getStopTime());
+                        for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
+                            listener.OnStopTimeChange(getStopTime());
+                        }
                     }
                     handler.postDelayed(timeOutRunnable, 970);
                 }
@@ -160,7 +139,9 @@ public class WorkTimeModel {
 
     public void setWorkTimeInMillis(long workTimeInMillis) {
         customWorkTime = workTimeInMillis;
-        listener.OnStopTimeChange(getStopTime());
+        for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
+            listener.OnStopTimeChange(getStopTime());
+        }
     }
 
     public long getStopTime(){
@@ -182,10 +163,12 @@ public class WorkTimeModel {
         overTime = 0;
         handler.removeCallbacks(workTimeRunnable);
         handler.removeCallbacks(timeOutRunnable);
-        listener.OnWorkingTimeChange(0L);
-        listener.OnOverTimeChange(0L);
-        listener.OnStopTimeChange(0L);
-        listener.OnTimeOutChange(0L);
+        for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
+            listener.OnWorkingTimeChange(0L);
+            listener.OnOverTimeChange(0L);
+            listener.OnStopTimeChange(0L);
+            listener.OnTimeOutChange(0L);
+        }
     }
 
     //public void OnDestroyApp(Preference pref) {

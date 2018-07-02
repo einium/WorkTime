@@ -5,6 +5,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,13 +14,13 @@ import android.widget.TimePicker;
 
 import com.compassplus.worktime.Preference;
 import com.compassplus.worktime.R;
+import com.compassplus.worktime.TimeManagementService;
 import com.compassplus.worktime.databinding.ActivityMainBinding;
 import com.compassplus.worktime.viewmodel.WorkTimeViewModel;
 
 public class MainActivity extends AppCompatActivity {
     private WorkTimeViewModel viewModel;
     private ActivityMainBinding binding;
-    //private Intent intentService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,22 +29,7 @@ public class MainActivity extends AppCompatActivity {
         viewModel = ViewModelProviders.of(this).get(WorkTimeViewModel.class);
         binding.setViewmodel(viewModel);
         setObservers(viewModel, binding);
-        viewModel.loadModelState(new Preference(this));
-
-        //intentService = new Intent(this, TimeManagementService.class);
-        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        //    startForegroundService(intentService);
-        //}else{
-        //    startService(intentService);
-        //}
     }
-
-    //@Override
-    //protected void onDestroy() {
-    //    viewModel.OnDestroyApp(new Preference(this));
-    //    Log.d("logtag", "onDestroy()");
-    //    super.onDestroy();
-    //}
 
     private void setObservers(WorkTimeViewModel viewModel, final ActivityMainBinding binding){
         viewModel.startTimeText.observe(this, new Observer<String>() {
@@ -114,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickButton(View view) {
         if (viewModel != null) {
-            viewModel.OnClickButton();
+            viewModel.OnClickButton(this);
         }
     }
 

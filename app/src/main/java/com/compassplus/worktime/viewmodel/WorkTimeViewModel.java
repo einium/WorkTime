@@ -2,8 +2,11 @@ package com.compassplus.worktime.viewmodel;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 
-import com.compassplus.worktime.Preference;
+import com.compassplus.worktime.TimeManagementService;
 import com.compassplus.worktime.model.WorkTimeModel;
 
 import java.text.DateFormat;
@@ -57,18 +60,22 @@ public class WorkTimeViewModel extends ViewModel {
                    overTimeText.setValue(convertTimeToString(time, true));
                }
            };
+           model.addListener(listener);
     }
 
-    public void loadModelState(Preference pref) {
-        model.loadState(pref, listener);
-    }
-
-    public void OnClickButton() {
+    public void OnClickButton(Context context) {
         if (!model.isStarted) {
             model.Start();
             startTimeText.setValue(convertTimeToString(model.getStartTime(), false));
             stopTimeText.setValue(convertTimeToString(model.getStopTime(), false));
             isPaused.setValue(false);
+
+            Intent intentService = new Intent(context, TimeManagementService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intentService);
+            }else{
+                context.startService(intentService);
+            }
         }else{
             if (!model.isPaused){
                 model.Pause();
