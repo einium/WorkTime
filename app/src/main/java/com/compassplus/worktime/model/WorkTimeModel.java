@@ -30,14 +30,13 @@ public class WorkTimeModel {
     private long currentStartTime;
     private long commonWorkTime;
     private long currentWorkTime;
-    private long overTime;
 
     public boolean isPaused;
     private long commonTimeOut;
     private long currentTimeOut;
     private long currentTimeOutStartTime;
 
-    public WorkTimeModel() {
+    private WorkTimeModel() {
         isStarted = false;
         isPaused = false;
         commonWorkTime = 0;
@@ -45,13 +44,16 @@ public class WorkTimeModel {
         currentTimeOutStartTime = 0;
         commonTimeOut = 0;
         currentTimeOut = 0;
-        overTime = 0;
         handler = new Handler();
         createRunnables();
     }
 
     public void addListener(WorkTimeViewModel.IChangeTimeListener listener){
         listeners.add(listener);
+    }
+
+    public void removeListener(WorkTimeViewModel.IChangeTimeListener listener){
+        listeners.remove(listener);
     }
 
     private void createRunnables() {
@@ -61,16 +63,7 @@ public class WorkTimeModel {
                 if (isStarted && !isPaused) {
                     long curTime = System.currentTimeMillis();
                     currentWorkTime = curTime - currentStartTime;
-                    for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
-                        listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
-                    }
-
-                    if (commonWorkTime + currentWorkTime > getWorkDayInMillis()) {
-                        overTime = commonWorkTime + currentWorkTime - getWorkDayInMillis();
-                        for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
-                            listener.OnOverTimeChange(overTime);
-                        }
-                    }
+                    notifyListeners();
                     handler.postDelayed(workTimeRunnable, 970);
                 }
             }
@@ -81,18 +74,20 @@ public class WorkTimeModel {
                 if (isStarted && isPaused) {
                     long curTime = System.currentTimeMillis();
                     currentTimeOut = curTime-currentTimeOutStartTime;
-                    for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
-                        listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
-                    }
-                    if (overTime == 0){
-                        for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
-                            listener.OnStopTimeChange(getStopTime());
-                        }
-                    }
+                    notifyListeners();
                     handler.postDelayed(timeOutRunnable, 970);
                 }
             }
         };
+    }
+
+    private void notifyListeners(){
+        for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
+            listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
+            listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
+            listener.OnStopTimeChange(getStopTime());
+            listener.OnOverTimeChange(getOverTime());
+        }
     }
 
     public void Start(){
@@ -100,6 +95,10 @@ public class WorkTimeModel {
         globalStartTime = System.currentTimeMillis();
         currentStartTime = System.currentTimeMillis();
         handler.postDelayed(workTimeRunnable, 0);
+    }
+
+    public long getStartTime() {
+        return currentStartTime;
     }
 
     public void Pause(){
@@ -148,8 +147,11 @@ public class WorkTimeModel {
         return globalStartTime + getWorkDayInMillis() + commonTimeOut + currentTimeOut;
     }
 
-    public long getStartTime() {
-        return currentStartTime;
+    private long getOverTime(){
+        if (commonWorkTime + currentWorkTime > getWorkDayInMillis()) {
+            return commonWorkTime + currentWorkTime - getWorkDayInMillis();
+        }
+        return 0;
     }
 
     public void reset() {
@@ -160,7 +162,6 @@ public class WorkTimeModel {
         currentTimeOutStartTime = 0;
         commonTimeOut = 0;
         currentTimeOut = 0;
-        overTime = 0;
         handler.removeCallbacks(workTimeRunnable);
         handler.removeCallbacks(timeOutRunnable);
         for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {

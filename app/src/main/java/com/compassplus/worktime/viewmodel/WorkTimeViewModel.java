@@ -2,11 +2,8 @@ package com.compassplus.worktime.viewmodel;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
 
-import com.compassplus.worktime.TimeManagementService;
+import com.compassplus.worktime.Service.IManageServiceListener;
 import com.compassplus.worktime.model.WorkTimeModel;
 
 import java.text.DateFormat;
@@ -20,7 +17,7 @@ public class WorkTimeViewModel extends ViewModel {
     private int msInMinute = 60000;
     private String defValue = "--:--";
     private WorkTimeModel model;
-    private IChangeTimeListener listener;
+    private IManageServiceListener serviceListener;
 
     public MutableLiveData<Boolean> isPaused = new MutableLiveData<>();
     public MutableLiveData<Boolean> isStarted = new MutableLiveData<>();
@@ -39,7 +36,7 @@ public class WorkTimeViewModel extends ViewModel {
            stopTimeText.setValue(defValue);
            overTimeText.setValue(defValue);
             workDayText.setValue(convertTimeToStringCorrectly(getWorkDayHours(), getWorkDayMinutes()));
-           listener = new IChangeTimeListener(){
+           model.addListener(new IChangeTimeListener(){
                @Override
                public void OnWorkingTimeChange(Long time) {
                    workingTimeText.setValue(convertTimeToString(time, true));
@@ -59,23 +56,16 @@ public class WorkTimeViewModel extends ViewModel {
                public void OnOverTimeChange(Long time) {
                    overTimeText.setValue(convertTimeToString(time, true));
                }
-           };
-           model.addListener(listener);
+           });
     }
 
-    public void OnClickButton(Context context) {
+    public void OnClickButton() {
         if (!model.isStarted) {
             model.Start();
             startTimeText.setValue(convertTimeToString(model.getStartTime(), false));
             stopTimeText.setValue(convertTimeToString(model.getStopTime(), false));
             isPaused.setValue(false);
-
-            Intent intentService = new Intent(context, TimeManagementService.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intentService);
-            }else{
-                context.startService(intentService);
-            }
+            serviceListener.bindService();
         }else{
             if (!model.isPaused){
                 model.Pause();
@@ -129,12 +119,14 @@ public class WorkTimeViewModel extends ViewModel {
             model.reset();
             startTimeText.setValue(convertTimeToString(0, false));
             isStarted.setValue(false);
+            serviceListener.unBindService();
         }
     }
 
-    //public void OnDestroyApp(Preference pref) {
-    //    model.OnDestroyApp(pref);
-    //}
+    public void setServiceListener(IManageServiceListener listener){
+        if (listener != null)
+            serviceListener = listener;
+    }
 
     public interface IChangeTimeListener{
         void OnWorkingTimeChange(Long time);

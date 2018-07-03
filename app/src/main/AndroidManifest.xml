@@ -19,7 +19,7 @@
         </activity>
 
         <service
-            android:name=".TimeManagementService"
+            android:name=".Service.TimeManagementService"
             android:enabled="true"
             android:exported="true"/>
 
