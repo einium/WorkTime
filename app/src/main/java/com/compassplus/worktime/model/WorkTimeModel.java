@@ -1,8 +1,8 @@
 package com.compassplus.worktime.model;
 
 import android.os.Handler;
-import android.util.Log;
-import com.compassplus.worktime.viewmodel.WorkTimeViewModel;
+
+import com.compassplus.worktime.viewmodel.IChangeTimeListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,7 +20,7 @@ public class WorkTimeModel {
     }
 
     private long customWorkTime = 0;
-    private List<WorkTimeViewModel.IChangeTimeListener> listeners = new ArrayList<>();
+    private List<IChangeTimeListener> listeners = new ArrayList<>();
     private Handler handler;
     private Runnable workTimeRunnable;
     private Runnable timeOutRunnable;
@@ -48,11 +48,11 @@ public class WorkTimeModel {
         createRunnables();
     }
 
-    public void addListener(WorkTimeViewModel.IChangeTimeListener listener){
+    public void addListener(IChangeTimeListener listener){
         listeners.add(listener);
     }
 
-    public void removeListener(WorkTimeViewModel.IChangeTimeListener listener){
+    public void removeListener(IChangeTimeListener listener){
         listeners.remove(listener);
     }
 
@@ -82,7 +82,8 @@ public class WorkTimeModel {
     }
 
     private void notifyListeners(){
-        for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
+        for (IChangeTimeListener listener : listeners) {
+            listener.OnStartTimeChange(globalStartTime);
             listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
             listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
             listener.OnStopTimeChange(getStopTime());
@@ -138,12 +139,11 @@ public class WorkTimeModel {
 
     public void setWorkTimeInMillis(long workTimeInMillis) {
         customWorkTime = workTimeInMillis;
-        for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
-            listener.OnStopTimeChange(getStopTime());
-        }
+        notifyListeners();
     }
 
     public long getStopTime(){
+        if (globalStartTime == 0) return 0;
         return globalStartTime + getWorkDayInMillis() + commonTimeOut + currentTimeOut;
     }
 
@@ -159,17 +159,13 @@ public class WorkTimeModel {
         isPaused = false;
         commonWorkTime = 0;
         currentWorkTime = 0;
+        globalStartTime = 0;
         currentTimeOutStartTime = 0;
         commonTimeOut = 0;
         currentTimeOut = 0;
         handler.removeCallbacks(workTimeRunnable);
         handler.removeCallbacks(timeOutRunnable);
-        for (WorkTimeViewModel.IChangeTimeListener listener : listeners) {
-            listener.OnWorkingTimeChange(0L);
-            listener.OnOverTimeChange(0L);
-            listener.OnStopTimeChange(0L);
-            listener.OnTimeOutChange(0L);
-        }
+        notifyListeners();
     }
 
     //public void OnDestroyApp(Preference pref) {

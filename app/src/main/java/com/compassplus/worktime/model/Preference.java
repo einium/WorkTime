@@ -1,4 +1,4 @@
-package com.compassplus.worktime;
+package com.compassplus.worktime.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;

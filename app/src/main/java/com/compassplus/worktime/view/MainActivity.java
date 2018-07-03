@@ -24,12 +24,12 @@ import com.compassplus.worktime.viewmodel.WorkTimeViewModel;
 
 public class MainActivity extends AppCompatActivity {
     private WorkTimeViewModel viewModel;
-    private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        Log.d("logtag", "MainActivity onCreate()");
+        ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         viewModel = ViewModelProviders.of(this).get(WorkTimeViewModel.class);
         binding.setViewmodel(viewModel);
         setObservers(viewModel, binding);
@@ -142,6 +142,9 @@ public class MainActivity extends AppCompatActivity {
     public void resetTimer(View view) {
         if (viewModel != null){
             viewModel.resetTimer();
+        }
+        if (mBoundService != null){
+            mBoundService.dismisNotification();
         }
     }
 

@@ -1,4 +1,4 @@
-package com.compassplus.worktime;
+package com.compassplus.worktime.Service;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,7 +9,5 @@ import com.compassplus.worktime.Service.TimeManagementService;
 public class StartReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent intentService = new Intent(context, TimeManagementService.class);
-        context.startService(intentService);
     }
 }

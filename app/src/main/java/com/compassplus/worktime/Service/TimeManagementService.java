@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
@@ -15,7 +16,7 @@ import android.util.Log;
 import com.compassplus.worktime.R;
 import com.compassplus.worktime.model.WorkTimeModel;
 import com.compassplus.worktime.view.MainActivity;
-import com.compassplus.worktime.viewmodel.WorkTimeViewModel;
+import com.compassplus.worktime.viewmodel.IChangeTimeListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -26,28 +27,31 @@ import java.util.TimeZone;
 public class TimeManagementService extends Service {
 
     private final IBinder binder = new LocalBinder();
+
     public class LocalBinder extends Binder {
         public TimeManagementService getService() {
             return TimeManagementService.this;
         }
     }
 
-    private String notificationTitle = "WorkTime";
-    private String CHANNEL_ID = "work_time_channel";
     private CharSequence channelName = "time";
-    public static int notifID = 13056;
+    public static int notificationID = 13056;
     private String workingTime = "";
     private Notification notification;
     private NotificationManager notificationManager;
     private WorkTimeModel model;
-    private WorkTimeViewModel.IChangeTimeListener listener = new WorkTimeViewModel.IChangeTimeListener(){
+    private IChangeTimeListener listener = new IChangeTimeListener(){
+        @Override
+        public void OnStartTimeChange(Long time) {
+        }
+
         @Override
         public void OnWorkingTimeChange(Long time) {
             Log.d("logtag", "OnWorkingTimeChange time: " + time.toString());
             workingTime = convertTimeToString(time);
             createNotification();
             if (notificationManager != null && notification != null){
-                notificationManager.notify(notifID, notification);
+                notificationManager.notify(notificationID, notification);
             }
         }
 
@@ -79,7 +83,9 @@ public class TimeManagementService extends Service {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 4445, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
+        String notificationTitle = "WorkTime";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            String CHANNEL_ID = "work_time_channel";
             notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentIntent(pendingIntent)
                     .setContentTitle(notificationTitle)
@@ -100,22 +106,29 @@ public class TimeManagementService extends Service {
                     .setContentTitle(notificationTitle)
                     .setContentText(workingTime)
                     .setWhen(System.currentTimeMillis())
-                    .setOngoing(true)
+                    //.setOngoing(true)
                     .setAutoCancel(false);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                 builder.setSmallIcon(R.drawable.ic_access_time_black_24dp);
-            }else{
+            } else {
                 builder.setSmallIcon(R.drawable.ic_access_time_black_24dp);
             }
             notification = builder.build();
-            notification.flags = Notification.FLAG_ONGOING_EVENT;
+        }
+    }
+
+    public void dismisNotification() {
+        Log.d("logtag", "dismisNotification()");
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.cancel(notificationID);
         }
     }
 
     private String convertTimeToString(long time) {
         if (time == 0) return "--:--";
         DateFormat formatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
-        /*if (allowTimeZone)*/ formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         return formatter.format(new Date(time));
     }
 
