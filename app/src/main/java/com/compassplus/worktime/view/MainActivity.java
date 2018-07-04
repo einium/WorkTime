@@ -24,6 +24,7 @@ import com.compassplus.worktime.viewmodel.WorkTimeViewModel;
 
 public class MainActivity extends AppCompatActivity {
     private WorkTimeViewModel viewModel;
+    private Intent serviceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         viewModel = ViewModelProviders.of(this).get(WorkTimeViewModel.class);
         binding.setViewmodel(viewModel);
         setObservers(viewModel, binding);
+        serviceIntent = new Intent(getBaseContext(), TimeManagementService.class);
     }
 
     private void setObservers(WorkTimeViewModel viewModel, final ActivityMainBinding binding){
@@ -102,13 +104,17 @@ public class MainActivity extends AppCompatActivity {
         });
         viewModel.setServiceListener(new IManageServiceListener() {
             @Override
-            public void bindService() {
-                doBindService();
+            public void startService() {
+                MainActivity.this.startService(serviceIntent);
+                //doBindService();
             }
 
             @Override
-            public void unBindService() {
-                doUnbindService();
+            public void stopService() {
+                //doUnbindService();
+                if (serviceIntent != null){
+                    MainActivity.this.stopService(serviceIntent);
+                }
             }
         });
     }
@@ -120,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void changeWorkDay(View view) {
-        if (viewModel != null){
+        if (viewModel != null) {
             new TimePickerDialog(MainActivity.this,
                     timeSetListener,
                     viewModel.getWorkDayHours(),
@@ -140,15 +146,15 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void resetTimer(View view) {
-        if (viewModel != null){
+        if (viewModel != null) {
             viewModel.resetTimer();
         }
-        if (mBoundService != null){
-            mBoundService.dismisNotification();
-        }
+        //if (mBoundService != null){
+        //    mBoundService.dismisNotification();
+        //}
     }
 
-    private TimeManagementService mBoundService;
+    /*private TimeManagementService mBoundService;
     private boolean mIsBound;
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -179,9 +185,8 @@ public class MainActivity extends AppCompatActivity {
         // class name because we want a specific service implementation
         // that we know will be running in our own process (and thus
         // won't be supporting component replacement by other applications).
-        bindService(new Intent(getApplicationContext(), TimeManagementService.class),
-                mConnection,
-                Context.BIND_AUTO_CREATE);
+        bindService(new Intent(getBaseContext(), TimeManagementService.class),
+                mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
     }
 
@@ -192,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
             unbindService(mConnection);
             mIsBound = false;
         }
-    }
+    }*/
 }
 
 

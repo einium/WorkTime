@@ -75,7 +75,7 @@ public class WorkTimeViewModel extends ViewModel {
             //startTimeText.setValue(convertTimeToString(model.getStartTime(), false));
             //stopTimeText.setValue(convertTimeToString(model.getStopTime(), false));
             isPaused.setValue(false);
-            serviceListener.bindService();
+            serviceListener.startService();
         }else{
             if (!model.isPaused){
                 model.Pause();
@@ -130,7 +130,7 @@ public class WorkTimeViewModel extends ViewModel {
             model.reset();
             startTimeText.setValue(convertTimeToString(0, false));
             isStarted.setValue(false);
-            serviceListener.unBindService();
+            serviceListener.stopService();
         }
     }
 

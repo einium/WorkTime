@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.compassplus.worktime.R;
 import com.compassplus.worktime.model.WorkTimeModel;
@@ -36,7 +37,8 @@ public class TimeManagementService extends Service {
 
     private CharSequence channelName = "time";
     public static int notificationID = 13056;
-    private String workingTime = "";
+    private String workTime = "";
+    private String timeOut = "";
     private Notification notification;
     private NotificationManager notificationManager;
     private WorkTimeModel model;
@@ -48,7 +50,7 @@ public class TimeManagementService extends Service {
         @Override
         public void OnWorkingTimeChange(Long time) {
             Log.d("logtag", "OnWorkingTimeChange time: " + time.toString());
-            workingTime = convertTimeToString(time);
+            workTime = convertTimeToString(time);
             createNotification();
             if (notificationManager != null && notification != null){
                 notificationManager.notify(notificationID, notification);
@@ -76,23 +78,36 @@ public class TimeManagementService extends Service {
 
     @Override
     public void onCreate() {
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     }
 
     public void createNotification() {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 4445, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
+        //create notification layout
+        /*RemoteViews notificationLayout = new RemoteViews(getPackageName(), R.layout.notification);
+        notificationLayout.setTextViewText(R.id.tv_notif_workTimeValue, workTime);
+        notificationLayout.setTextViewText(R.id.tv_notif_timeOutValue, timeOut);
+        String btnText;
+        if (model != null && !model.isPaused) {
+            btnText = getResources().getString(R.string.pause);
+        } else {
+            btnText = getResources().getString(R.string.resume);
+        }
+        notificationLayout.setTextViewText(R.id.tv_notif_btn, btnText);*/
+
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         String notificationTitle = "WorkTime";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             String CHANNEL_ID = "work_time_channel";
             notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentIntent(pendingIntent)
                     .setContentTitle(notificationTitle)
-                    .setContentText(workingTime)
+                    .setContentText(workTime)
+                    //.setCustomContentView(notificationLayout)
                     .setSmallIcon(R.drawable.ic_access_time_black_24dp)
                     .setWhen(System.currentTimeMillis())
-                    .setAutoCancel(false)
+                    .setAutoCancel(true)
                     .setChannelId(CHANNEL_ID)
                     .build();
             if (notificationManager != null) {
@@ -104,15 +119,12 @@ public class TimeManagementService extends Service {
             Notification.Builder builder = new Notification.Builder(this);
             builder.setContentIntent(pendingIntent)
                     .setContentTitle(notificationTitle)
-                    .setContentText(workingTime)
+                    .setContentText(workTime)
+                    //.setContent(notificationLayout)
                     .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(R.drawable.ic_access_time_black_24dp)
                     //.setOngoing(true)
-                    .setAutoCancel(false);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                builder.setSmallIcon(R.drawable.ic_access_time_black_24dp);
-            } else {
-                builder.setSmallIcon(R.drawable.ic_access_time_black_24dp);
-            }
+                    .setAutoCancel(true);
             notification = builder.build();
         }
     }
@@ -134,6 +146,7 @@ public class TimeManagementService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d("logtag", "TimeManagementService onBind()");
         return binder;
     }
 
