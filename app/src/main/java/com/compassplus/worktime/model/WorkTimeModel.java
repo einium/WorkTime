@@ -1,12 +1,12 @@
 package com.compassplus.worktime.model;
 
-import android.os.Handler;
-
 import com.compassplus.worktime.viewmodel.IChangeTimeListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class WorkTimeModel {
     private static WorkTimeModel currentModel;
@@ -21,9 +21,9 @@ public class WorkTimeModel {
 
     private long customWorkTime = 0;
     private List<IChangeTimeListener> listeners = new ArrayList<>();
-    private Handler handler;
-    private Runnable workTimeRunnable;
-    private Runnable timeOutRunnable;
+
+    private Timer timer;
+    private TimerTask tTask;
 
     public boolean isStarted;
     private long globalStartTime;
@@ -44,8 +44,7 @@ public class WorkTimeModel {
         currentTimeOutStartTime = 0;
         commonTimeOut = 0;
         currentTimeOut = 0;
-        handler = new Handler();
-        createRunnables();
+        timer = new Timer();
     }
 
     public void addListener(IChangeTimeListener listener){
@@ -54,31 +53,6 @@ public class WorkTimeModel {
 
     public void removeListener(IChangeTimeListener listener){
         listeners.remove(listener);
-    }
-
-    private void createRunnables() {
-        workTimeRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (isStarted && !isPaused) {
-                    long curTime = System.currentTimeMillis();
-                    currentWorkTime = curTime - currentStartTime;
-                    notifyListeners();
-                    handler.postDelayed(workTimeRunnable, 970);
-                }
-            }
-        };
-        timeOutRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (isStarted && isPaused) {
-                    long curTime = System.currentTimeMillis();
-                    currentTimeOut = curTime-currentTimeOutStartTime;
-                    notifyListeners();
-                    handler.postDelayed(timeOutRunnable, 970);
-                }
-            }
-        };
     }
 
     private void notifyListeners(){
@@ -95,11 +69,21 @@ public class WorkTimeModel {
         isStarted = true;
         globalStartTime = System.currentTimeMillis();
         currentStartTime = System.currentTimeMillis();
-        handler.postDelayed(workTimeRunnable, 0);
-    }
 
-    public long getStartTime() {
-        return currentStartTime;
+        tTask = new TimerTask() {
+            public void run() {
+                if (!isPaused){
+                    long curTime = System.currentTimeMillis();
+                    currentWorkTime = curTime - currentStartTime;
+                    notifyListeners();
+                } else {
+                    long curTime = System.currentTimeMillis();
+                    currentTimeOut = curTime-currentTimeOutStartTime;
+                    notifyListeners();
+                }
+            }
+        };
+        timer.schedule(tTask, 0, 1000);
     }
 
     public void Pause(){
@@ -107,7 +91,6 @@ public class WorkTimeModel {
         commonWorkTime += currentWorkTime;
         currentWorkTime = 0;
         currentTimeOutStartTime = System.currentTimeMillis();
-        handler.postDelayed(timeOutRunnable, 0);
     }
 
     public void Resume() {
@@ -115,7 +98,6 @@ public class WorkTimeModel {
         commonTimeOut += currentTimeOut;
         currentTimeOut = 0;
         currentStartTime = System.currentTimeMillis();
-        handler.postDelayed(workTimeRunnable, 0);
     }
 
     public long getWorkDayInMillis() {
@@ -142,12 +124,12 @@ public class WorkTimeModel {
         notifyListeners();
     }
 
-    public long getStopTime(){
+    private long getStopTime() {
         if (globalStartTime == 0) return 0;
         return globalStartTime + getWorkDayInMillis() + commonTimeOut + currentTimeOut;
     }
 
-    private long getOverTime(){
+    private long getOverTime() {
         if (commonWorkTime + currentWorkTime > getWorkDayInMillis()) {
             return commonWorkTime + currentWorkTime - getWorkDayInMillis();
         }
@@ -163,8 +145,8 @@ public class WorkTimeModel {
         currentTimeOutStartTime = 0;
         commonTimeOut = 0;
         currentTimeOut = 0;
-        handler.removeCallbacks(workTimeRunnable);
-        handler.removeCallbacks(timeOutRunnable);
+        tTask.cancel();
+        tTask = null;
         notifyListeners();
     }
 

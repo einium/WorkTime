@@ -32,40 +32,40 @@ public class WorkTimeViewModel extends ViewModel {
     public WorkTimeViewModel() {
         Log.d("logtag", "WorkTimeViewModel()");
         model = WorkTimeModel.getInstance();
-          startTimeText.setValue(defValue);
-        workingTimeText.setValue(defValue);
-            timeOutText.setValue(defValue);
-           stopTimeText.setValue(defValue);
-           overTimeText.setValue(defValue);
-            workDayText.setValue(convertTimeToStringCorrectly(getWorkDayHours(), getWorkDayMinutes()));
+          startTimeText.postValue(defValue);
+        workingTimeText.postValue(defValue);
+            timeOutText.postValue(defValue);
+           stopTimeText.postValue(defValue);
+           overTimeText.postValue(defValue);
+            workDayText.postValue(convertTimeToStringCorrectly(getWorkDayHours(), getWorkDayMinutes()));
            model.addListener(new IChangeTimeListener(){
                @Override
                public void OnStartTimeChange(Long time) {
-                   startTimeText.setValue(convertTimeToString(time, false));
+                   startTimeText.postValue(convertTimeToString(time, false));
                }
 
                @Override
                public void OnWorkingTimeChange(Long time) {
-                   workingTimeText.setValue(convertTimeToString(time, true));
+                   workingTimeText.postValue(convertTimeToString(time, true));
                }
 
                @Override
                public void OnTimeOutChange(Long time) {
-                   timeOutText.setValue(convertTimeToString(time, true));
+                   timeOutText.postValue(convertTimeToString(time, true));
                }
 
                @Override
                public void OnStopTimeChange(Long time) {
-                   stopTimeText.setValue(convertTimeToString(time, false));
+                   stopTimeText.postValue(convertTimeToString(time, false));
                }
 
                @Override
                public void OnOverTimeChange(Long time) {
-                   overTimeText.setValue(convertTimeToString(time, true));
+                   overTimeText.postValue(convertTimeToString(time, true));
                }
            });
-           isStarted.setValue(model.isStarted);
-           isPaused.setValue(model.isPaused);
+           isStarted.postValue(model.isStarted);
+           isPaused.postValue(model.isPaused);
     }
 
     public void OnClickButton() {
