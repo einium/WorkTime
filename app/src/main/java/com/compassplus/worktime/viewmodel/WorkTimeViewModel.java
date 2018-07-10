@@ -2,9 +2,11 @@ package com.compassplus.worktime.viewmodel;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.Context;
 import android.util.Log;
 
 import com.compassplus.worktime.Service.IManageServiceListener;
+import com.compassplus.worktime.model.Preference;
 import com.compassplus.worktime.model.WorkTimeModel;
 
 import java.text.DateFormat;
@@ -64,16 +66,19 @@ public class WorkTimeViewModel extends ViewModel {
                    overTimeText.postValue(convertTimeToString(time, true));
                }
            });
-           isStarted.postValue(model.isStarted);
-           isPaused.postValue(model.isPaused);
     }
 
-    public void OnClickButton() {
+    public void loadSavedState(Context context){
+        if (model != null) {
+            model.loadSavedState(new Preference(context));
+        }
+    }
+
+    public void OnClickButton(Context context) {
         Log.d("logtag", "WorkTimeViewModel OnClickButton()");
         if (!model.isStarted) {
             model.Start();
-            //startTimeText.setValue(convertTimeToString(model.getStartTime(), false));
-            //stopTimeText.setValue(convertTimeToString(model.getStopTime(), false));
+            isStarted.setValue(true);
             isPaused.setValue(false);
             serviceListener.startService();
         }else{
@@ -85,6 +90,7 @@ public class WorkTimeViewModel extends ViewModel {
                 isPaused.setValue(false);
             }
         }
+        model.saveCurrentState(new Preference(context));
     }
 
     private String convertTimeToString(long time, boolean setTimeZone) {
@@ -124,10 +130,12 @@ public class WorkTimeViewModel extends ViewModel {
         return String.valueOf(hourOfDay) + ":" + String.valueOf(minute);
     }
 
-    public void resetTimer() {
+    public void resetTimer(Context context) {
         Log.d("logtag", "WorkTimeViewModel resetTimer()");
         if (model != null) {
             model.reset();
+            model.saveCurrentState(new Preference(context));
+
             startTimeText.setValue(convertTimeToString(0, false));
             isStarted.setValue(false);
             serviceListener.stopService();
@@ -137,5 +145,11 @@ public class WorkTimeViewModel extends ViewModel {
     public void setServiceListener(IManageServiceListener listener){
         if (listener != null)
             serviceListener = listener;
+    }
+
+    public void saveCurrentState(Context context) {
+        if (model != null) {
+            model.saveCurrentState(new Preference(context));
+        }
     }
 }

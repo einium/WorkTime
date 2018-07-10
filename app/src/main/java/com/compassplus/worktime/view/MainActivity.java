@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickButton(View view) {
         if (viewModel != null) {
-            viewModel.OnClickButton();
+            viewModel.OnClickButton(this);
         }
     }
 
@@ -145,21 +145,40 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("logtag", "MainActivity onResume()");
+        
+    }
+
     public void resetTimer(View view) {
         if (viewModel != null) {
-            viewModel.resetTimer();
+            viewModel.resetTimer(this);
         }
-        //if (mBoundService != null){
-        //    mBoundService.dismisNotification();
-        //}
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d("logtag", "MainActivity onSaveInstanceState()");
+        if (viewModel != null) {
+            viewModel.saveCurrentState(this);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("logtag", "MainActivity onDestroy()");
+        //doUnbindService();
     }
 
     /*private TimeManagementService mBoundService;
     private boolean mIsBound;
-
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-            Log.d("logtag", "onServiceConnected()");
+            Log.d("logtag", "mConnection onServiceConnected()");
             // This is called when the connection with the service has
             // been established, giving us the service object we can use
             // to interact with the service.  Because we have bound to a
@@ -170,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            Log.d("logtag", "onServiceDisconnected()");
+            Log.d("logtag", "mConnection onServiceDisconnected()");
             // This is called when the connection with the service has
             // been unexpectedly disconnected -- that is, its process
             // crashed. Because it is running in our same process, we

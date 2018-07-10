@@ -10,7 +10,6 @@ import java.util.TimerTask;
 
 public class WorkTimeModel {
     private static WorkTimeModel currentModel;
-
     public static WorkTimeModel getInstance(){
         if (currentModel == null) {
             currentModel = new WorkTimeModel();
@@ -30,59 +29,32 @@ public class WorkTimeModel {
     private long currentStartTime;
     private long commonWorkTime;
     private long currentWorkTime;
-
     public boolean isPaused;
+    private long currentTimeOutStartTime;
     private long commonTimeOut;
     private long currentTimeOut;
-    private long currentTimeOutStartTime;
 
     private WorkTimeModel() {
         isStarted = false;
-        isPaused = false;
+        globalStartTime = 0;
+        currentStartTime = 0;
         commonWorkTime = 0;
         currentWorkTime = 0;
+        isPaused = false;
         currentTimeOutStartTime = 0;
         commonTimeOut = 0;
         currentTimeOut = 0;
+
         timer = new Timer();
-    }
-
-    public void addListener(IChangeTimeListener listener){
-        listeners.add(listener);
-    }
-
-    public void removeListener(IChangeTimeListener listener){
-        listeners.remove(listener);
-    }
-
-    private void notifyListeners(){
-        for (IChangeTimeListener listener : listeners) {
-            listener.OnStartTimeChange(globalStartTime);
-            listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
-            listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
-            listener.OnStopTimeChange(getStopTime());
-            listener.OnOverTimeChange(getOverTime());
-        }
     }
 
     public void Start(){
         isStarted = true;
         globalStartTime = System.currentTimeMillis();
         currentStartTime = System.currentTimeMillis();
-
-        tTask = new TimerTask() {
-            public void run() {
-                if (!isPaused){
-                    long curTime = System.currentTimeMillis();
-                    currentWorkTime = curTime - currentStartTime;
-                    notifyListeners();
-                } else {
-                    long curTime = System.currentTimeMillis();
-                    currentTimeOut = curTime-currentTimeOutStartTime;
-                    notifyListeners();
-                }
-            }
-        };
+        if (tTask == null) {
+            tTask = createTimerTask();
+        }
         timer.schedule(tTask, 0, 1000);
     }
 
@@ -138,23 +110,97 @@ public class WorkTimeModel {
 
     public void reset() {
         isStarted = false;
-        isPaused = false;
+        globalStartTime = 0;
+        currentStartTime = 0;
         commonWorkTime = 0;
         currentWorkTime = 0;
-        globalStartTime = 0;
+        isPaused = false;
         currentTimeOutStartTime = 0;
         commonTimeOut = 0;
         currentTimeOut = 0;
+
         tTask.cancel();
         tTask = null;
         notifyListeners();
     }
 
-    //public void OnDestroyApp(Preference pref) {
-    //    if (isStarted){
-    //        pref.saveCurrentState(commonWorkTime, currentStartTime, commonTimeOut, currentTimeOutStartTime, customWorkTime, isPaused);
-    //    }
-    //    handler.removeCallbacks(workTimeRunnable);
-    //    handler.removeCallbacks(timeOutRunnable);
-    //}
+    private TimerTask createTimerTask(){
+        return new TimerTask() {
+            public void run() {
+                if (!isPaused){
+                    long curTime = System.currentTimeMillis();
+                    currentWorkTime = curTime - currentStartTime;
+                    notifyListeners();
+                } else {
+                    long curTime = System.currentTimeMillis();
+                    currentTimeOut = curTime-currentTimeOutStartTime;
+                    notifyListeners();
+                }
+            }
+        };
+    }
+
+    public void saveCurrentState(Preference pref) {
+        if (isStarted){
+            pref.saveCurrentState(isStarted,
+                    globalStartTime,
+                    currentStartTime,
+                    commonWorkTime,
+                    currentWorkTime,
+                    isPaused,
+                    currentTimeOutStartTime,
+                    commonTimeOut,
+                    currentTimeOut,
+                    customWorkTime);
+        } else {
+            pref.saveCurrentState(false,
+                    0,
+                    0,
+                    0,
+                    0,
+                    false,
+                    0,
+                    0,
+                    0,
+                    0);
+        }
+    }
+
+    public void loadSavedState(Preference prefs){
+        isStarted = prefs.loadStarted();
+        globalStartTime = prefs.loadGlobalStartTime();
+        currentStartTime = prefs.loadCurrentStartTime();
+        commonWorkTime = prefs.loadCommonWorkTime();
+        currentWorkTime = prefs.loadCurrentWorkTime();
+        isPaused = prefs.loadPaused();
+        currentTimeOutStartTime = prefs.loadCurrentTimeOutStartTime();
+        commonTimeOut = prefs.loadCommonTimeOut();
+        currentTimeOut = prefs.loadCurrentTimeOut();
+
+        if (isStarted) {
+            if (tTask == null) {
+                tTask = createTimerTask();
+            }
+            timer.schedule(tTask, 0, 1000);
+        }
+    }
+
+    public void addListener(IChangeTimeListener listener){
+        listeners.add(listener);
+    }
+
+    public void removeListener(IChangeTimeListener listener){
+        listeners.remove(listener);
+    }
+
+    private void notifyListeners(){
+        for (IChangeTimeListener listener : listeners) {
+            listener.OnStartTimeChange(globalStartTime);
+            listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
+            listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
+            listener.OnStopTimeChange(getStopTime());
+            listener.OnOverTimeChange(getOverTime());
+        }
+    }
+
 }

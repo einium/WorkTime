@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import java.util.Calendar;
-
 public class Preference {
     private SharedPreferences sp;
 
@@ -13,52 +11,60 @@ public class Preference {
         sp = context.getSharedPreferences("timeState", Context.MODE_PRIVATE);
     }
 
-    public void saveCurrentState(long commonWorkTime,
+    public void saveCurrentState(boolean isStarted,
+                                 long globalStartTime,
                                  long currentStartTime,
-                                 long commonTimeOut,
+                                 long commonWorkTime,
+                                 long currentWorkTime,
+                                 boolean isPaused,
                                  long currentTimeOutStartTime,
-                                 long customWorkTime,
-                                 boolean isPaused) {
+                                 long commonTimeOut,
+                                 long currentTimeOut,
+                                 long customWorkTime) {
+
         SharedPreferences.Editor editor = sp.edit();
-        editor.putLong("currentDate", System.currentTimeMillis());
-        editor.putLong("commonWorkTime", commonWorkTime);
+        editor.putBoolean("isStarted", isStarted);
+        editor.putLong("globalStartTime", globalStartTime);
         editor.putLong("currentStartTime", currentStartTime);
+        editor.putLong("commonWorkTime", commonWorkTime);
+        editor.putLong("currentWorkTime", currentWorkTime);
         editor.putBoolean("isPaused", isPaused);
-        editor.putLong("commonTimeOut", commonTimeOut);
         editor.putLong("currentTimeOutStartTime", currentTimeOutStartTime);
+        editor.putLong("commonTimeOut", commonTimeOut);
+        editor.putLong("currentTimeOut", currentTimeOut);
         editor.putLong("customWorkTime", customWorkTime);
         editor.apply();
 
         Log.d("logtag", "current state saved in preference");
     }
-
-    public boolean loadSavedState(){
-        Log.d("logtag", "Preference try load state");
-        long savedDate = sp.getLong("currentDate", 0L);
-        if (savedDate == 0L) return false;
-        Calendar savedDateCalendar = Calendar.getInstance();
-        savedDateCalendar.setTimeInMillis(savedDate);
-        Calendar currentDateCalendar = Calendar.getInstance();
-        return currentDateCalendar.get(Calendar.DAY_OF_YEAR) == savedDateCalendar.get(Calendar.DAY_OF_YEAR);
+    public boolean loadStarted(){
+        return sp.getBoolean("isStarted", false);
     }
-
-    public long loadCommonWorkTime(){
-        return sp.getLong("commonWorkTime", 0L);
+    public long loadGlobalStartTime(){
+        return sp.getLong("globalStartTime", 0L);
     }
     public long loadCurrentStartTime(){
         return sp.getLong("currentStartTime", 0L);
     }
+    public long loadCommonWorkTime(){
+        return sp.getLong("commonWorkTime", 0L);
+    }
+    public long loadCurrentWorkTime(){
+        return sp.getLong("currentWorkTime", 0L);
+    }
     public boolean loadPaused(){
         return sp.getBoolean("isPaused", false);
-    }
-    public long loadCommonTimeOut(){
-        return sp.getLong("commonTimeOut", 0L);
     }
     public long loadCurrentTimeOutStartTime(){
         return sp.getLong("currentTimeOutStartTime", 0L);
     }
-
-    public long loadCustomWorkTime() {
+    public long loadCommonTimeOut(){
+        return sp.getLong("commonTimeOut", 0L);
+    }
+    public long loadCurrentTimeOut(){
+        return sp.getLong("currentTimeOut", 0L);
+    }
+    public long loadCustomWorkTime(){
         return sp.getLong("customWorkTime", 0L);
     }
 }

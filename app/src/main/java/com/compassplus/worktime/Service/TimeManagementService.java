@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 import com.compassplus.worktime.R;
 import com.compassplus.worktime.model.WorkTimeModel;
@@ -51,8 +50,9 @@ public class TimeManagementService extends Service {
         public void OnWorkingTimeChange(Long time) {
             Log.d("logtag", "OnWorkingTimeChange time: " + time.toString());
             workTime = convertTimeToString(time);
+
             createNotification();
-            if (notificationManager != null && notification != null){
+            if (notificationManager != null && notification != null) {
                 notificationManager.notify(notificationID, notification);
             }
         }
@@ -78,6 +78,7 @@ public class TimeManagementService extends Service {
 
     @Override
     public void onCreate() {
+        Log.d("logtag", "TimeManagementService onCreate()");
     }
 
     public void createNotification() {
@@ -105,7 +106,7 @@ public class TimeManagementService extends Service {
                     .setContentTitle(notificationTitle)
                     .setContentText(workTime)
                     //.setCustomContentView(notificationLayout)
-                    .setSmallIcon(R.drawable.ic_access_time_black_24dp)
+                    .setSmallIcon(R.drawable.notidication_icon)
                     .setWhen(System.currentTimeMillis())
                     .setAutoCancel(true)
                     .setChannelId(CHANNEL_ID)
@@ -122,7 +123,7 @@ public class TimeManagementService extends Service {
                     .setContentText(workTime)
                     //.setContent(notificationLayout)
                     .setWhen(System.currentTimeMillis())
-                    .setSmallIcon(R.drawable.ic_access_time_black_24dp)
+                    .setSmallIcon(R.drawable.notidication_icon)
                     //.setOngoing(true)
                     .setAutoCancel(true);
             notification = builder.build();
@@ -154,6 +155,10 @@ public class TimeManagementService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d("logtag", "TimeManagementService onDestroy()");
+        Intent serviceIntent = new Intent(getBaseContext(), TimeManagementService.class);
+        if (model.isStarted) {
+            startService(serviceIntent);
+        }
         model.removeListener(listener);
     }
 }
