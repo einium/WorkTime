@@ -21,7 +21,7 @@ public class WorkTimeModel {
     private long customWorkTime = 0;
     private List<IChangeTimeListener> listeners = new ArrayList<>();
 
-    private Timer timer;
+    private Timer timer = new Timer();
     private TimerTask tTask;
 
     public boolean isStarted;
@@ -44,8 +44,6 @@ public class WorkTimeModel {
         currentTimeOutStartTime = 0;
         commonTimeOut = 0;
         currentTimeOut = 0;
-
-        timer = new Timer();
     }
 
     public void Start(){
@@ -142,7 +140,7 @@ public class WorkTimeModel {
 
     public void saveCurrentState(Preference pref) {
         if (isStarted){
-            pref.saveCurrentState(isStarted,
+            pref.saveCurrentState(true,
                     globalStartTime,
                     currentStartTime,
                     commonWorkTime,
@@ -203,4 +201,7 @@ public class WorkTimeModel {
         }
     }
 
+    public long getGlobalStartTime(){
+        return globalStartTime;
+    }
 }

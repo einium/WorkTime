@@ -70,7 +70,11 @@ public class WorkTimeViewModel extends ViewModel {
 
     public void loadSavedState(Context context){
         if (model != null) {
-            model.loadSavedState(new Preference(context));
+            if (model.getGlobalStartTime() == 0){
+                Log.d("logtag", "model.loadSavedState()");
+                model.loadSavedState(new Preference(context));
+            }
+
         }
     }
 

@@ -3,12 +3,8 @@ package com.compassplus.worktime.view;
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.databinding.DataBindingUtil;
-import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -149,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d("logtag", "MainActivity onResume()");
-        
+        viewModel.loadSavedState(this);
     }
 
     public void resetTimer(View view) {
