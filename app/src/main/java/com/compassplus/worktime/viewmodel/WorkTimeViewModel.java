@@ -120,10 +120,12 @@ public class WorkTimeViewModel extends ViewModel {
         return (int) (workDay - hours*msInHour)/msInMinute;
     }
 
-    public void setNewWorkTime(int hourOfDay, int minute) {
+    public void setNewWorkTime(int hourOfDay, int minute, Context context) {
         long workTimeInMillis = hourOfDay*msInHour + minute*msInMinute;
-        if (model != null)
+        if (model != null){
             model.setWorkTimeInMillis(workTimeInMillis);
+            model.saveCurrentState(new Preference(context));
+        }
         workDayText.setValue(convertTimeToStringCorrectly(hourOfDay, minute));
     }
 

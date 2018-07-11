@@ -2,9 +2,13 @@ package com.compassplus.worktime.model;
 
 import com.compassplus.worktime.viewmodel.IChangeTimeListener;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -117,8 +121,10 @@ public class WorkTimeModel {
         commonTimeOut = 0;
         currentTimeOut = 0;
 
-        tTask.cancel();
-        tTask = null;
+        if (tTask != null){
+            tTask.cancel();
+            tTask = null;
+        }
         notifyListeners();
     }
 
@@ -167,13 +173,19 @@ public class WorkTimeModel {
     public void loadSavedState(Preference prefs){
         isStarted = prefs.loadStarted();
         globalStartTime = prefs.loadGlobalStartTime();
-        currentStartTime = prefs.loadCurrentStartTime();
-        commonWorkTime = prefs.loadCommonWorkTime();
-        currentWorkTime = prefs.loadCurrentWorkTime();
-        isPaused = prefs.loadPaused();
-        currentTimeOutStartTime = prefs.loadCurrentTimeOutStartTime();
-        commonTimeOut = prefs.loadCommonTimeOut();
-        currentTimeOut = prefs.loadCurrentTimeOut();
+        boolean isNewDay = checkForNewDay(globalStartTime);
+        if (isStarted && !isNewDay) {
+            currentStartTime = prefs.loadCurrentStartTime();
+            commonWorkTime = prefs.loadCommonWorkTime();
+            currentWorkTime = prefs.loadCurrentWorkTime();
+            isPaused = prefs.loadPaused();
+            currentTimeOutStartTime = prefs.loadCurrentTimeOutStartTime();
+            commonTimeOut = prefs.loadCommonTimeOut();
+            currentTimeOut = prefs.loadCurrentTimeOut();
+            customWorkTime = prefs.loadCustomWorkTime();
+        } else {
+            reset();
+        }
 
         if (isStarted) {
             if (tTask == null) {
@@ -181,6 +193,13 @@ public class WorkTimeModel {
             }
             timer.schedule(tTask, 0, 1000);
         }
+    }
+
+    private boolean checkForNewDay(long globalStartTime) {
+        DateFormat formatter = new SimpleDateFormat("MM.dd.yyyy", Locale.getDefault());
+        String savedDate = formatter.format(new Date(globalStartTime));
+        String today = formatter.format(new Date(System.currentTimeMillis()));
+        return savedDate.equals(today);
     }
 
     public void addListener(IChangeTimeListener listener){
