@@ -73,8 +73,11 @@ public class WorkTimeViewModel extends ViewModel {
             if (model.getGlobalStartTime() == 0){
                 Log.d("logtag", "model.loadSavedState()");
                 model.loadSavedState(new Preference(context));
+                isStarted.postValue(model.isStarted);
+                isPaused.postValue(model.isPaused);
+                workDayText.postValue(convertTimeToStringCorrectly(getWorkDayHours(), getWorkDayMinutes()));
+                serviceListener.startService();
             }
-
         }
     }
 

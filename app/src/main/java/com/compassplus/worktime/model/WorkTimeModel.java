@@ -1,5 +1,7 @@
 package com.compassplus.worktime.model;
 
+import android.util.Log;
+
 import com.compassplus.worktime.viewmodel.IChangeTimeListener;
 
 import java.text.DateFormat;
@@ -111,6 +113,7 @@ public class WorkTimeModel {
     }
 
     public void reset() {
+        Log.d("logtag", "WorkTimeModel reset()");
         isStarted = false;
         globalStartTime = 0;
         currentStartTime = 0;
@@ -145,6 +148,7 @@ public class WorkTimeModel {
     }
 
     public void saveCurrentState(Preference pref) {
+        Log.d("logtag", "WorkTimeModel saveCurrentState()");
         if (isStarted){
             pref.saveCurrentState(true,
                     globalStartTime,
@@ -171,10 +175,11 @@ public class WorkTimeModel {
     }
 
     public void loadSavedState(Preference prefs){
-        isStarted = prefs.loadStarted();
+        Log.d("logtag", "WorkTimeModel loadSavedState()");
         globalStartTime = prefs.loadGlobalStartTime();
         boolean isNewDay = checkForNewDay(globalStartTime);
-        if (isStarted && !isNewDay) {
+        if (!isNewDay) {
+            isStarted = prefs.loadStarted();
             currentStartTime = prefs.loadCurrentStartTime();
             commonWorkTime = prefs.loadCommonWorkTime();
             currentWorkTime = prefs.loadCurrentWorkTime();
@@ -199,7 +204,8 @@ public class WorkTimeModel {
         DateFormat formatter = new SimpleDateFormat("MM.dd.yyyy", Locale.getDefault());
         String savedDate = formatter.format(new Date(globalStartTime));
         String today = formatter.format(new Date(System.currentTimeMillis()));
-        return savedDate.equals(today);
+        Log.d("logtag", "           checkForNewDay() savedDate: " + savedDate + ", today: " + today);
+        return !savedDate.equals(today);
     }
 
     public void addListener(IChangeTimeListener listener){

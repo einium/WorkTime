@@ -5,6 +5,6 @@
     <color name="colorAccent">#999999</color>
     <color name="colorText">#999999</color>
     <color name="colorTextGreen">#ff669900</color>
-    <color name="colorTextRed">#ff990000</color>
+    <color name="colorTextRed">#ffff8888</color>
     <color name="colorButton">#444444</color>
 </resources>

@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         serviceIntent = new Intent(getBaseContext(), TimeManagementService.class);
     }
 
-    private void setObservers(WorkTimeViewModel viewModel, final ActivityMainBinding binding){
+    private void setObservers(final WorkTimeViewModel viewModel, final ActivityMainBinding binding){
         viewModel.startTimeText.observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
