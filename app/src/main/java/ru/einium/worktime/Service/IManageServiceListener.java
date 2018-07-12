@@ -1,4 +1,4 @@
-package com.compassplus.worktime.Service;
+package ru.einium.worktime.Service;
 
 public interface IManageServiceListener {
     void startService();

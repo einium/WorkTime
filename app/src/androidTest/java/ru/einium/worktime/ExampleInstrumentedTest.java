@@ -1,4 +1,4 @@
-package com.compassplus.worktime;
+package ru.einium.worktime;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

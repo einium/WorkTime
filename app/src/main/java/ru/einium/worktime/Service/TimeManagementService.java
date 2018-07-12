@@ -1,4 +1,4 @@
-package com.compassplus.worktime.Service;
+package ru.einium.worktime.Service;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -13,10 +13,10 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.compassplus.worktime.R;
-import com.compassplus.worktime.model.WorkTimeModel;
-import com.compassplus.worktime.view.MainActivity;
-import com.compassplus.worktime.viewmodel.IChangeTimeListener;
+import ru.einium.worktime.R;
+import ru.einium.worktime.model.WorkTimeModel;
+import ru.einium.worktime.view.MainActivity;
+import ru.einium.worktime.viewmodel.IChangeTimeListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

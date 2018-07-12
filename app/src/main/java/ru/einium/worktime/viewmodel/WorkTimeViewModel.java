@@ -1,13 +1,13 @@
-package com.compassplus.worktime.viewmodel;
+package ru.einium.worktime.viewmodel;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.util.Log;
 
-import com.compassplus.worktime.Service.IManageServiceListener;
-import com.compassplus.worktime.model.Preference;
-import com.compassplus.worktime.model.WorkTimeModel;
+import ru.einium.worktime.Service.IManageServiceListener;
+import ru.einium.worktime.model.Preference;
+import ru.einium.worktime.model.WorkTimeModel;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

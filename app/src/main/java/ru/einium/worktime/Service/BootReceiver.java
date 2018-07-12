@@ -1,11 +1,11 @@
-package com.compassplus.worktime.Service;
+package ru.einium.worktime.Service;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.compassplus.worktime.Service.TimeManagementService;
+import ru.einium.worktime.Service.TimeManagementService;
 
 public class BootReceiver extends BroadcastReceiver {
     @Override

@@ -1,4 +1,4 @@
-package com.compassplus.worktime.viewmodel;
+package ru.einium.worktime.viewmodel;
 
 public interface IChangeTimeListener{
     void OnStartTimeChange(Long time);

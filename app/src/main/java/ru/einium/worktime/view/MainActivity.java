@@ -1,4 +1,4 @@
-package com.compassplus.worktime.view;
+package ru.einium.worktime.view;
 
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.Observer;
@@ -12,11 +12,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TimePicker;
 
-import com.compassplus.worktime.Service.IManageServiceListener;
-import com.compassplus.worktime.R;
-import com.compassplus.worktime.Service.TimeManagementService;
-import com.compassplus.worktime.databinding.ActivityMainBinding;
-import com.compassplus.worktime.viewmodel.WorkTimeViewModel;
+import ru.einium.worktime.Service.IManageServiceListener;
+import ru.einium.worktime.R;
+import ru.einium.worktime.Service.TimeManagementService;
+import ru.einium.worktime.databinding.ActivityMainBinding;
+import ru.einium.worktime.viewmodel.WorkTimeViewModel;
 
 public class MainActivity extends AppCompatActivity {
     private WorkTimeViewModel viewModel;

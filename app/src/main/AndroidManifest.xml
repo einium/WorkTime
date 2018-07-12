@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.compassplus.worktime">
+    package="ru.einium.worktime">
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
@@ -33,9 +33,6 @@
                 <action android:name="android.intent.action.REBOOT"/>
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
         </receiver>
-
     </application>
-
 </manifest>

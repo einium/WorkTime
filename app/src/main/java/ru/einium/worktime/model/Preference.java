@@ -1,4 +1,4 @@
-package com.compassplus.worktime.model;
+package ru.einium.worktime.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
