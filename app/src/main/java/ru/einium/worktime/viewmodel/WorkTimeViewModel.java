@@ -73,8 +73,8 @@ public class WorkTimeViewModel extends ViewModel {
             if (model.getGlobalStartTime() == 0){
                 Log.d("logtag", "model.loadSavedState()");
                 model.loadSavedState(new Preference(context));
-                isStarted.postValue(model.isStarted);
                 isPaused.postValue(model.isPaused);
+                isStarted.postValue(model.isStarted);
                 workDayText.postValue(convertTimeToStringCorrectly(getWorkDayHours(), getWorkDayMinutes()));
                 serviceListener.startService();
             }
@@ -85,16 +85,16 @@ public class WorkTimeViewModel extends ViewModel {
         Log.d("logtag", "WorkTimeViewModel OnClickButton()");
         if (!model.isStarted) {
             model.Start();
-            isStarted.setValue(true);
-            isPaused.setValue(false);
+            isStarted.postValue(true);
+            isPaused.postValue(false);
             serviceListener.startService();
         }else{
             if (!model.isPaused){
                 model.Pause();
-                isPaused.setValue(true);
+                isPaused.postValue(true);
             }else{
                 model.Resume();
-                isPaused.setValue(false);
+                isPaused.postValue(false);
             }
         }
         model.saveCurrentState(new Preference(context));

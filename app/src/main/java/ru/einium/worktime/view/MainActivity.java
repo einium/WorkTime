@@ -3,8 +3,12 @@ package ru.einium.worktime.view;
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.databinding.DataBindingUtil;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,20 +24,21 @@ import ru.einium.worktime.viewmodel.WorkTimeViewModel;
 
 public class MainActivity extends AppCompatActivity {
     private WorkTimeViewModel viewModel;
+    private ActivityMainBinding binding;
     private Intent serviceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d("logtag", "MainActivity onCreate()");
-        ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         viewModel = ViewModelProviders.of(this).get(WorkTimeViewModel.class);
         binding.setViewmodel(viewModel);
         setObservers(viewModel, binding);
         serviceIntent = new Intent(getBaseContext(), TimeManagementService.class);
     }
 
-    private void setObservers(final WorkTimeViewModel viewModel, final ActivityMainBinding binding){
+    private void setObservers(final WorkTimeViewModel viewModel, final ActivityMainBinding binding) {
         viewModel.startTimeText.observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
@@ -101,14 +106,16 @@ public class MainActivity extends AppCompatActivity {
         viewModel.setServiceListener(new IManageServiceListener() {
             @Override
             public void startService() {
-                MainActivity.this.startService(serviceIntent);
-                //doBindService();
+                if (serviceIntent != null){
+                    MainActivity.this.startService(serviceIntent);
+                    doBindService();
+                }
             }
-
             @Override
             public void stopService() {
-                //doUnbindService();
                 if (serviceIntent != null){
+                    mBoundService.stopShowingNotification();
+                    doUnbindService();
                     MainActivity.this.stopService(serviceIntent);
                 }
             }
@@ -146,6 +153,15 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d("logtag", "MainActivity onResume()");
         viewModel.loadSavedState(this);
+        if (viewModel.isStarted.getValue() != null && viewModel.isStarted.getValue()){
+            if (viewModel.isPaused.getValue() != null && viewModel.isPaused.getValue()){
+                binding.button.setText(R.string.resume);
+            } else {
+                binding.button.setText(R.string.pause);
+            }
+        } else {
+            binding.button.setText(R.string.start);
+        }
     }
 
     public void resetTimer(View view) {
@@ -167,10 +183,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d("logtag", "MainActivity onDestroy()");
-        //doUnbindService();
+        doUnbindService();
     }
 
-    /*private TimeManagementService mBoundService;
+    private TimeManagementService mBoundService;
     private boolean mIsBound;
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -182,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
             // process, we can cast its IBinder to a concrete class and
             // directly access it.
             mBoundService = ((TimeManagementService.LocalBinder)service).getService();
+            mBoundService.startShowingNotification();
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -212,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
             unbindService(mConnection);
             mIsBound = false;
         }
-    }*/
+    }
 }
 
 

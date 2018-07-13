@@ -27,13 +27,12 @@ import java.util.TimeZone;
 public class TimeManagementService extends Service {
 
     private final IBinder binder = new LocalBinder();
-
     public class LocalBinder extends Binder {
         public TimeManagementService getService() {
             return TimeManagementService.this;
         }
     }
-
+    private boolean isShowNotification = true;
     private CharSequence channelName = "time";
     public static int notificationID = 13056;
     private String workTime = "";
@@ -50,8 +49,9 @@ public class TimeManagementService extends Service {
         public void OnWorkingTimeChange(Long time) {
             Log.d("logtag", "OnWorkingTimeChange time: " + time.toString());
             workTime = convertTimeToString(time);
-
-            createNotification();
+            if (isShowNotification) {
+                createNotification();
+            }
             if (notificationManager != null && notification != null) {
                 notificationManager.notify(notificationID, notification);
             }
@@ -79,6 +79,10 @@ public class TimeManagementService extends Service {
     @Override
     public void onCreate() {
         Log.d("logtag", "TimeManagementService onCreate()");
+    }
+
+    public void startShowingNotification() {
+        isShowNotification = true;
     }
 
     public void createNotification() {
@@ -128,6 +132,11 @@ public class TimeManagementService extends Service {
                     .setAutoCancel(true);
             notification = builder.build();
         }
+    }
+
+    public void stopShowingNotification() {
+        isShowNotification = false;
+        dismisNotification();
     }
 
     public void dismisNotification() {
