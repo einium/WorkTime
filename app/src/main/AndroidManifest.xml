@@ -34,5 +34,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+
+        <receiver android:name=".Service.PressNotificationButtonReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="Press_action_button" />
+            </intent-filter>
+        </receiver>
+
     </application>
 </manifest>

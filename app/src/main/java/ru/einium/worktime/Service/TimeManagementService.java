@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -12,6 +13,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import ru.einium.worktime.R;
 import ru.einium.worktime.model.WorkTimeModel;
@@ -47,18 +49,14 @@ public class TimeManagementService extends Service {
 
         @Override
         public void OnWorkingTimeChange(Long time) {
-            Log.d("logtag", "OnWorkingTimeChange time: " + time.toString());
             workTime = convertTimeToString(time);
-            if (isShowNotification) {
-                createNotification();
-            }
-            if (notificationManager != null && notification != null) {
-                notificationManager.notify(notificationID, notification);
-            }
+            show();
         }
 
         @Override
         public void OnTimeOutChange(Long time) {
+            timeOut = convertTimeToString(time);
+            show();
         }
 
         @Override
@@ -76,45 +74,37 @@ public class TimeManagementService extends Service {
         model.addListener(listener);
     }
 
-    @Override
-    public void onCreate() {
-        Log.d("logtag", "TimeManagementService onCreate()");
-    }
-
     public void startShowingNotification() {
         isShowNotification = true;
     }
 
-    public void createNotification() {
+    private void show(){
+        if (isShowNotification) {
+            createNotification();
+        }
+        if (notificationManager != null && notification != null) {
+            notificationManager.notify(notificationID, notification);
+        }
+    }
+    private void createNotification() {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 4445, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        //create notification layout
-        /*RemoteViews notificationLayout = new RemoteViews(getPackageName(), R.layout.notification);
-        notificationLayout.setTextViewText(R.id.tv_notif_workTimeValue, workTime);
-        notificationLayout.setTextViewText(R.id.tv_notif_timeOutValue, timeOut);
-        String btnText;
-        if (model != null && !model.isPaused) {
-            btnText = getResources().getString(R.string.pause);
-        } else {
-            btnText = getResources().getString(R.string.resume);
-        }
-        notificationLayout.setTextViewText(R.id.tv_notif_btn, btnText);*/
-
+        RemoteViews notificationContent = createNotificationLayout();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         String notificationTitle = "WorkTime";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             String CHANNEL_ID = "work_time_channel";
-            notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentIntent(pendingIntent)
                     .setContentTitle(notificationTitle)
                     .setContentText(workTime)
-                    //.setCustomContentView(notificationLayout)
+                    .setContent(notificationContent)
                     .setSmallIcon(R.drawable.notidication_icon)
                     .setWhen(System.currentTimeMillis())
                     .setAutoCancel(true)
-                    .setChannelId(CHANNEL_ID)
-                    .build();
+                    .setChannelId(CHANNEL_ID);
+            notification = builder.build();
             if (notificationManager != null) {
                 int importance = NotificationManager.IMPORTANCE_HIGH;
                 NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, importance);
@@ -125,13 +115,32 @@ public class TimeManagementService extends Service {
             builder.setContentIntent(pendingIntent)
                     .setContentTitle(notificationTitle)
                     .setContentText(workTime)
-                    //.setContent(notificationLayout)
+                    .setContent(notificationContent)
                     .setWhen(System.currentTimeMillis())
                     .setSmallIcon(R.drawable.notidication_icon)
-                    //.setOngoing(true)
                     .setAutoCancel(true);
             notification = builder.build();
         }
+    }
+
+    private RemoteViews createNotificationLayout(){
+        RemoteViews notificationLayout = new RemoteViews(getPackageName(), R.layout.notification);
+        notificationLayout.setTextViewText(R.id.tv_notif_workTimeValue, workTime);
+        notificationLayout.setTextViewText(R.id.tv_notif_timeOutValue, timeOut);
+        String btnText;
+        if (model != null && !model.isPaused) {
+            btnText = getResources().getString(R.string.pause);
+        } else {
+            btnText = getResources().getString(R.string.resume);
+        }
+        notificationLayout.setTextViewText(R.id.tv_notif_btn, btnText);
+
+        Intent button = new Intent("Press_action_button");
+        button.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, button, 0);
+
+        notificationLayout.setOnClickPendingIntent(R.id.tv_notif_btn, pendingIntent);
+        return notificationLayout;
     }
 
     public void stopShowingNotification() {
@@ -139,12 +148,17 @@ public class TimeManagementService extends Service {
         dismisNotification();
     }
 
-    public void dismisNotification() {
-        Log.d("logtag", "dismisNotification()");
+    private void dismisNotification() {
         NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
             notificationManager.cancel(notificationID);
         }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d("logtag", "TimeManagementService onBind()");
+        return binder;
     }
 
     private String convertTimeToString(long time) {
@@ -152,12 +166,6 @@ public class TimeManagementService extends Service {
         DateFormat formatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         return formatter.format(new Date(time));
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.d("logtag", "TimeManagementService onBind()");
-        return binder;
     }
 
     @Override
@@ -171,3 +179,4 @@ public class TimeManagementService extends Service {
         model.removeListener(listener);
     }
 }
+
