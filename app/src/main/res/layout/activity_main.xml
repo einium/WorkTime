@@ -73,6 +73,7 @@
             android:textSize="18sp"
             android:text='@{viewmodel.startTimeText}'
             android:textColor="@color/colorText"
+            android:onClick="changeStartTime"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_start_time" />

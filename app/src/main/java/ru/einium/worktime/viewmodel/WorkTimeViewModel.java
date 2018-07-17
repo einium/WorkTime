@@ -11,6 +11,7 @@ import ru.einium.worktime.model.WorkTimeModel;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -130,6 +131,39 @@ public class WorkTimeViewModel extends ViewModel {
             model.saveCurrentState(new Preference(context));
         }
         workDayText.setValue(convertTimeToStringCorrectly(hourOfDay, minute));
+    }
+
+    public int getStartTimeHour() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(model.getStartTime());
+        return calendar.get(Calendar.HOUR_OF_DAY);
+    }
+
+    public int getStartTimeMinute() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(model.getStartTime());
+        return calendar.get(Calendar.MINUTE);
+    }
+
+    public void setStartTime(Context context, int hourOfDay, int minute) {
+        Calendar newStartTime = Calendar.getInstance();
+        newStartTime.setTimeInMillis(System.currentTimeMillis());
+        newStartTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        newStartTime.set(Calendar.MINUTE, minute);
+        newStartTime.set(Calendar.SECOND, 0);
+        newStartTime.set(Calendar.MILLISECOND, 0);
+        newStartTime.setTimeZone(TimeZone.getDefault());
+
+        if (model != null) {
+            long maxAllowedTime = model.getMaxAllowedStartTime();
+            //проверка, если пользователь выбрал еще не наступившее время
+            if (newStartTime.getTimeInMillis() < maxAllowedTime) {
+                model.setStartTime(newStartTime.getTimeInMillis());
+            } else {
+                model.setStartTime(maxAllowedTime);
+            }
+            model.saveCurrentState(new Preference(context));
+        }
     }
 
     private String convertTimeToStringCorrectly(int hourOfDay, int minute){

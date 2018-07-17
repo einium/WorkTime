@@ -42,6 +42,7 @@ public class TimeManagementService extends Service {
     private Notification notification;
     private NotificationManager notificationManager;
     private WorkTimeModel model;
+
     private IChangeTimeListener listener = new IChangeTimeListener(){
         @Override
         public void OnStartTimeChange(Long time) {

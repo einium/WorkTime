@@ -56,6 +56,7 @@ public class WorkTimeModel {
         isStarted = true;
         globalStartTime = System.currentTimeMillis();
         currentStartTime = System.currentTimeMillis();
+        Log.d("logtag", "WorkTimeModel Start()");
         if (tTask == null) {
             tTask = createTimerTask();
         }
@@ -97,6 +98,23 @@ public class WorkTimeModel {
 
     public void setWorkTimeInMillis(long workTimeInMillis) {
         customWorkTime = workTimeInMillis;
+        notifyListeners();
+    }
+
+    public void setStartTime(long startTimeInMillis) {
+        long startTimeDiff = globalStartTime - startTimeInMillis;
+        globalStartTime = startTimeInMillis;
+        if (isStarted) {
+            if (!isPaused){
+                if (commonWorkTime == 0) {
+                    currentStartTime = startTimeInMillis;
+                } else {
+                    commonWorkTime += startTimeDiff;
+                }
+            } else {
+                commonWorkTime += startTimeDiff;
+            }
+        }
         notifyListeners();
     }
 
@@ -204,7 +222,6 @@ public class WorkTimeModel {
         DateFormat formatter = new SimpleDateFormat("MM.dd.yyyy", Locale.getDefault());
         String savedDate = formatter.format(new Date(globalStartTime));
         String today = formatter.format(new Date(System.currentTimeMillis()));
-        Log.d("logtag", "           checkForNewDay() savedDate: " + savedDate + ", today: " + today);
         return !savedDate.equals(today);
     }
 
@@ -230,5 +247,13 @@ public class WorkTimeModel {
 
     public long getGlobalStartTime(){
         return globalStartTime;
+    }
+
+    public long getStartTime() {
+        return globalStartTime;
+    }
+
+    public long getMaxAllowedStartTime() {
+        return System.currentTimeMillis() - commonTimeOut;
     }
 }

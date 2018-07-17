@@ -34,8 +34,6 @@ public class Preference {
         editor.putLong("currentTimeOut", currentTimeOut);
         editor.putLong("customWorkTime", customWorkTime);
         editor.apply();
-
-        Log.d("logtag", "current state saved in preference");
     }
     public boolean loadStarted(){
         return sp.getBoolean("isStarted", false);

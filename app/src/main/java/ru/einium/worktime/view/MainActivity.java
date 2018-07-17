@@ -16,6 +16,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TimePicker;
 
+import java.util.Calendar;
+
 import ru.einium.worktime.Service.IManageServiceListener;
 import ru.einium.worktime.R;
 import ru.einium.worktime.Service.TimeManagementService;
@@ -30,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("logtag", "____________________________________________________");
         Log.d("logtag", "MainActivity onCreate()");
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         viewModel = ViewModelProviders.of(this).get(WorkTimeViewModel.class);
@@ -128,18 +131,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void changeWorkDay(View view) {
-        if (viewModel != null) {
-            new TimePickerDialog(MainActivity.this,
-                    timeSetListener,
-                    viewModel.getWorkDayHours(),
-                    viewModel.getWorkDayMinutes(),
-                    true)
-                    .show();
-        }
-    }
-
-    TimePickerDialog.OnTimeSetListener timeSetListener = new TimePickerDialog.OnTimeSetListener() {
+    TimePickerDialog.OnTimeSetListener workTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
             if (viewModel != null) {
@@ -147,6 +139,37 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    public void changeWorkDay(View view) {
+        if (viewModel != null) {
+            new TimePickerDialog(MainActivity.this,
+                    workTimeSetListener,
+                    viewModel.getWorkDayHours(),
+                    viewModel.getWorkDayMinutes(),
+                    true)
+                    .show();
+        }
+    }
+
+    TimePickerDialog.OnTimeSetListener startTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            if (viewModel != null) {
+                viewModel.setStartTime(getBaseContext(), hourOfDay, minute);
+            }
+        }
+    };
+
+    public void changeStartTime(View view) {
+        if (viewModel != null) {
+            new TimePickerDialog(MainActivity.this,
+                    startTimeSetListener,
+                    viewModel.getStartTimeHour(),
+                    viewModel.getStartTimeMinute(),
+                    true)
+                    .show();
+        }
+    }
 
     @Override
     protected void onResume() {
@@ -190,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean mIsBound;
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-            Log.d("logtag", "mConnection onServiceConnected()");
+            //Log.d("logtag", "mConnection onServiceConnected()");
             // This is called when the connection with the service has
             // been established, giving us the service object we can use
             // to interact with the service.  Because we have bound to a
@@ -202,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            Log.d("logtag", "mConnection onServiceDisconnected()");
+            //Log.d("logtag", "mConnection onServiceDisconnected()");
             // This is called when the connection with the service has
             // been unexpectedly disconnected -- that is, its process
             // crashed. Because it is running in our same process, we
@@ -210,9 +233,8 @@ public class MainActivity extends AppCompatActivity {
             mBoundService = null;
         }
     };
-
     void doBindService() {
-        Log.d("logtag", "doBindService()");
+        //Log.d("logtag", "doBindService()");
         // Establish a connection with the service.  We use an explicit
         // class name because we want a specific service implementation
         // that we know will be running in our own process (and thus
@@ -221,9 +243,8 @@ public class MainActivity extends AppCompatActivity {
                 mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
     }
-
     void doUnbindService() {
-        Log.d("logtag", "doUnbindService()");
+        //Log.d("logtag", "doUnbindService()");
         if (mIsBound) {
             // Detach our existing connection.
             unbindService(mConnection);
