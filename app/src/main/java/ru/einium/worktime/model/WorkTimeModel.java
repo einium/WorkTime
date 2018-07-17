@@ -221,7 +221,9 @@ public class WorkTimeModel {
             listener.OnStartTimeChange(globalStartTime);
             listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
             listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
-            listener.OnStopTimeChange(getStopTime());
+            if (getOverTime() == 0) {
+                listener.OnStopTimeChange(getStopTime());
+            }
             listener.OnOverTimeChange(getOverTime());
         }
     }
