@@ -6,4 +6,6 @@ public interface IChangeTimeListener{
     void OnTimeOutChange(Long time);
     void OnStopTimeChange(Long time);
     void OnOverTimeChange(Long time);
+    void OnStartedChanged(boolean started);
+    void OnPausedChanged(boolean paused);
 }

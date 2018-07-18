@@ -61,6 +61,7 @@ public class WorkTimeModel {
             tTask = createTimerTask();
         }
         timer.schedule(tTask, 0, 1000);
+        notifyListeners();
     }
 
     public void Pause(){
@@ -68,6 +69,7 @@ public class WorkTimeModel {
         commonWorkTime += currentWorkTime;
         currentWorkTime = 0;
         currentTimeOutStartTime = System.currentTimeMillis();
+        notifyListeners();
     }
 
     public void Resume() {
@@ -75,6 +77,7 @@ public class WorkTimeModel {
         commonTimeOut += currentTimeOut;
         currentTimeOut = 0;
         currentStartTime = System.currentTimeMillis();
+        notifyListeners();
     }
 
     public long getWorkDayInMillis() {
@@ -209,13 +212,13 @@ public class WorkTimeModel {
         } else {
             reset();
         }
-
         if (isStarted) {
             if (tTask == null) {
                 tTask = createTimerTask();
             }
             timer.schedule(tTask, 0, 1000);
         }
+        notifyListeners();
     }
 
     private boolean checkForNewDay(long globalStartTime) {
@@ -233,18 +236,6 @@ public class WorkTimeModel {
         listeners.remove(listener);
     }
 
-    private void notifyListeners(){
-        for (IChangeTimeListener listener : listeners) {
-            listener.OnStartTimeChange(globalStartTime);
-            listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
-            listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
-            if (getOverTime() == 0) {
-                listener.OnStopTimeChange(getStopTime());
-            }
-            listener.OnOverTimeChange(getOverTime());
-        }
-    }
-
     public long getGlobalStartTime(){
         return globalStartTime;
     }
@@ -255,5 +246,19 @@ public class WorkTimeModel {
 
     public long getMaxAllowedStartTime() {
         return System.currentTimeMillis() - commonTimeOut;
+    }
+
+    private void notifyListeners(){
+        for (IChangeTimeListener listener : listeners) {
+            listener.OnStartTimeChange(globalStartTime);
+            listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
+            listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
+            if (getOverTime() == 0) {
+                listener.OnStopTimeChange(getStopTime());
+            }
+            listener.OnOverTimeChange(getOverTime());
+            listener.OnPausedChanged(isPaused);
+            listener.OnStartedChanged(isStarted);
+        }
     }
 }

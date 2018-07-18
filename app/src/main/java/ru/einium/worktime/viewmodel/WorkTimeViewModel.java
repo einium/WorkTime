@@ -66,6 +66,16 @@ public class WorkTimeViewModel extends ViewModel {
                public void OnOverTimeChange(Long time) {
                    overTimeText.postValue(convertTimeToString(time, true));
                }
+
+               @Override
+               public void OnStartedChanged(boolean started) {
+                   isStarted.postValue(started);
+               }
+
+               @Override
+               public void OnPausedChanged(boolean paused) {
+                    isPaused.postValue(paused);
+               }
            });
     }
 
@@ -74,8 +84,6 @@ public class WorkTimeViewModel extends ViewModel {
             if (model.getGlobalStartTime() == 0){
                 Log.d("logtag", "model.loadSavedState()");
                 model.loadSavedState(new Preference(context));
-                isPaused.postValue(model.isPaused);
-                isStarted.postValue(model.isStarted);
                 workDayText.postValue(convertTimeToStringCorrectly(getWorkDayHours(), getWorkDayMinutes()));
                 serviceListener.startService();
             }
@@ -86,16 +94,12 @@ public class WorkTimeViewModel extends ViewModel {
         Log.d("logtag", "WorkTimeViewModel OnClickButton()");
         if (!model.isStarted) {
             model.Start();
-            isStarted.postValue(true);
-            isPaused.postValue(false);
             serviceListener.startService();
         }else{
             if (!model.isPaused){
                 model.Pause();
-                isPaused.postValue(true);
             }else{
                 model.Resume();
-                isPaused.postValue(false);
             }
         }
         model.saveCurrentState(new Preference(context));
@@ -180,7 +184,6 @@ public class WorkTimeViewModel extends ViewModel {
             model.saveCurrentState(new Preference(context));
 
             startTimeText.setValue(convertTimeToString(0, false));
-            isStarted.setValue(false);
             serviceListener.stopService();
         }
     }

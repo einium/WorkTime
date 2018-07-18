@@ -67,6 +67,14 @@ public class TimeManagementService extends Service {
         @Override
         public void OnOverTimeChange(Long time) {
         }
+
+        @Override
+        public void OnStartedChanged(boolean started) {
+        }
+
+        @Override
+        public void OnPausedChanged(boolean paused) {
+        }
     };
 
     public TimeManagementService() {
