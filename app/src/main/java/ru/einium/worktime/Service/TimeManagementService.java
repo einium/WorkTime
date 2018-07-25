@@ -186,6 +186,7 @@ public class TimeManagementService extends Service {
             startService(serviceIntent);
         }
         model.removeListener(listener);
+        dismisNotification();
     }
 }
 

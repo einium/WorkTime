@@ -16,7 +16,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TimePicker;
 
-import java.util.Calendar;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 import ru.einium.worktime.Service.IManageServiceListener;
 import ru.einium.worktime.R;
@@ -37,8 +39,71 @@ public class MainActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         viewModel = ViewModelProviders.of(this).get(WorkTimeViewModel.class);
         binding.setViewmodel(viewModel);
-        setObservers(viewModel, binding);
         serviceIntent = new Intent(getBaseContext(), TimeManagementService.class);
+    }
+
+    public void onClickButton(View view) {
+        if (viewModel != null) {
+            viewModel.OnClickButton(this);
+        }
+    }
+
+    TimePickerDialog.OnTimeSetListener workTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            if (viewModel != null) {
+                viewModel.setNewWorkTime(hourOfDay, minute, getBaseContext());
+            }
+        }
+    };
+
+    public void changeWorkDay(View view) {
+        if (viewModel != null) {
+            new TimePickerDialog(MainActivity.this,
+                    workTimeSetListener,
+                    viewModel.getWorkDayHours(),
+                    viewModel.getWorkDayMinutes(),
+                    true)
+                    .show();
+        }
+    }
+
+    TimePickerDialog.OnTimeSetListener startTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            if (viewModel != null) {
+                viewModel.setStartTime(getBaseContext(), hourOfDay, minute);
+            }
+        }
+    };
+
+    public void changeStartTime(View view) {
+        if (viewModel != null) {
+            new TimePickerDialog(MainActivity.this,
+                    startTimeSetListener,
+                    viewModel.getStartTimeHour(),
+                    viewModel.getStartTimeMinute(),
+                    true)
+                    .show();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("logtag", "MainActivity onResume()");
+        viewModel.loadSavedState(this);
+        if (viewModel.isStarted.getValue() != null && viewModel.isStarted.getValue()){
+            if (viewModel.isPaused.getValue() != null && viewModel.isPaused.getValue()){
+                binding.button.setText(R.string.resume);
+            } else {
+                binding.button.setText(R.string.pause);
+            }
+        } else {
+            binding.button.setText(R.string.start);
+        }
+        setObservers(viewModel, binding);
+        setDateInTitle();
     }
 
     private void setObservers(final WorkTimeViewModel viewModel, final ActivityMainBinding binding) {
@@ -46,14 +111,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChanged(@Nullable String s) {
                 if (s != null && !s.isEmpty())
-                binding.tvStartTimeValue.setText(s);
+                    binding.tvStartTimeValue.setText(s);
             }
         });
         viewModel.workingTimeText.observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 if (s != null && !s.isEmpty())
-                binding.tvWorkingTimeValue.setText(s);
+                    binding.tvWorkingTimeValue.setText(s);
             }
         });
         viewModel.timeOutText.observe(this, new Observer<String>() {
@@ -117,7 +182,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void stopService() {
                 if (serviceIntent != null){
-                    mBoundService.stopShowingNotification();
+                    if (mBoundService != null) {
+                        mBoundService.stopShowingNotification();
+                    }
                     doUnbindService();
                     MainActivity.this.stopService(serviceIntent);
                 }
@@ -125,66 +192,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void onClickButton(View view) {
-        if (viewModel != null) {
-            viewModel.OnClickButton(this);
-        }
-    }
-
-    TimePickerDialog.OnTimeSetListener workTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
-        @Override
-        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            if (viewModel != null) {
-                viewModel.setNewWorkTime(hourOfDay, minute, getBaseContext());
-            }
-        }
-    };
-
-    public void changeWorkDay(View view) {
-        if (viewModel != null) {
-            new TimePickerDialog(MainActivity.this,
-                    workTimeSetListener,
-                    viewModel.getWorkDayHours(),
-                    viewModel.getWorkDayMinutes(),
-                    true)
-                    .show();
-        }
-    }
-
-    TimePickerDialog.OnTimeSetListener startTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
-        @Override
-        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            if (viewModel != null) {
-                viewModel.setStartTime(getBaseContext(), hourOfDay, minute);
-            }
-        }
-    };
-
-    public void changeStartTime(View view) {
-        if (viewModel != null) {
-            new TimePickerDialog(MainActivity.this,
-                    startTimeSetListener,
-                    viewModel.getStartTimeHour(),
-                    viewModel.getStartTimeMinute(),
-                    true)
-                    .show();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d("logtag", "MainActivity onResume()");
-        viewModel.loadSavedState(this);
-        if (viewModel.isStarted.getValue() != null && viewModel.isStarted.getValue()){
-            if (viewModel.isPaused.getValue() != null && viewModel.isPaused.getValue()){
-                binding.button.setText(R.string.resume);
-            } else {
-                binding.button.setText(R.string.pause);
-            }
-        } else {
-            binding.button.setText(R.string.start);
-        }
+    private void setDateInTitle() {
+        String title = getResources().getString(R.string.app_name);
+        title = title + " - "+ getDateInHumanFormat();
+        setTitle(title);
     }
 
     public void resetTimer(View view) {
@@ -250,6 +261,11 @@ public class MainActivity extends AppCompatActivity {
             unbindService(mConnection);
             mIsBound = false;
         }
+    }
+
+    public String getDateInHumanFormat() {
+        DateFormat humanFormatter = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+        return humanFormatter.format(System.currentTimeMillis());
     }
 }
 

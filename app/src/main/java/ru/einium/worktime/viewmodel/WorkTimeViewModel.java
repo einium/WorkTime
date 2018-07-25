@@ -6,6 +6,7 @@ import android.content.Context;
 import android.util.Log;
 
 import ru.einium.worktime.Service.IManageServiceListener;
+import ru.einium.worktime.Service.TimeManagementService;
 import ru.einium.worktime.model.Preference;
 import ru.einium.worktime.model.WorkTimeModel;
 
@@ -85,7 +86,9 @@ public class WorkTimeViewModel extends ViewModel {
                 Log.d("logtag", "model.loadSavedState()");
                 model.loadSavedState(new Preference(context));
                 workDayText.postValue(convertTimeToStringCorrectly(getWorkDayHours(), getWorkDayMinutes()));
-                serviceListener.startService();
+                if (serviceListener != null) {
+                    serviceListener.startService();
+                }
             }
         }
     }
@@ -94,7 +97,9 @@ public class WorkTimeViewModel extends ViewModel {
         Log.d("logtag", "WorkTimeViewModel OnClickButton()");
         if (!model.isStarted) {
             model.Start();
-            serviceListener.startService();
+            if (serviceListener != null) {
+                serviceListener.startService();
+            }
         }else{
             if (!model.isPaused){
                 model.Pause();
@@ -184,13 +189,16 @@ public class WorkTimeViewModel extends ViewModel {
             model.saveCurrentState(new Preference(context));
 
             startTimeText.setValue(convertTimeToString(0, false));
-            serviceListener.stopService();
+            if (serviceListener != null){
+                serviceListener.stopService();
+            }
         }
     }
 
     public void setServiceListener(IManageServiceListener listener){
-        if (listener != null)
+        if (listener != null) {
             serviceListener = listener;
+        }
     }
 
     public void saveCurrentState(Context context) {

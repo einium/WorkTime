@@ -22,6 +22,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="4dp"
                 android:text="@string/time_in"
+                android:textColor="@color/colorText"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -31,6 +32,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="4dp"
                 android:text="@string/default_value"
+                android:textColor="@color/colorText"
                 app:layout_constraintStart_toEndOf="@+id/tv_notif_workTime"
                 app:layout_constraintTop_toTopOf="parent" />
         </LinearLayout>
@@ -47,6 +49,7 @@
                 android:layout_margin="4dp"
                 android:layout_marginStart="16dp"
                 android:text="@string/time_out"
+                android:textColor="@color/colorText"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_notif_workTime" />
@@ -57,6 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="4dp"
                 android:text="@string/default_value"
+                android:textColor="@color/colorText"
                 app:layout_constraintStart_toEndOf="@+id/tv_notif_timeOut"
                 app:layout_constraintTop_toBottomOf="@+id/tv_notif_workTime" />
         </LinearLayout>
@@ -71,6 +75,7 @@
         android:layout_margin="4dp"
         android:layout_weight="1"
         android:text="@string/pause"
+        android:textColor="@color/colorText"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"

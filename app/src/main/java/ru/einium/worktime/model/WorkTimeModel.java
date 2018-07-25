@@ -127,6 +127,7 @@ public class WorkTimeModel {
     }
 
     private long getOverTime() {
+        if (globalStartTime == 0) return 0;
         if (commonWorkTime + currentWorkTime > getWorkDayInMillis()) {
             return commonWorkTime + currentWorkTime - getWorkDayInMillis();
         }
