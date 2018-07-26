@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d("logtag", "MainActivity onResume()");
+        setObservers(viewModel, binding);
         viewModel.loadSavedState(this);
         if (viewModel.isStarted.getValue() != null && viewModel.isStarted.getValue()){
             if (viewModel.isPaused.getValue() != null && viewModel.isPaused.getValue()){
@@ -102,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             binding.button.setText(R.string.start);
         }
-        setObservers(viewModel, binding);
         setDateInTitle();
     }
 
