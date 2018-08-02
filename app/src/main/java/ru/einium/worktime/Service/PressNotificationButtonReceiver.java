@@ -18,6 +18,6 @@ public class PressNotificationButtonReceiver  extends BroadcastReceiver {
                 model.Resume();
             }
         }
-        model.saveCurrentState(new Preference(context));
+        model.saveCurrentState(new Preference());
     }
 }

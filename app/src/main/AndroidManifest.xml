@@ -4,11 +4,13 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
+        android:name=".MyApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".view.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -35,11 +37,31 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".Service.PressNotificationButtonReceiver" android:exported="false">
+        <receiver
+            android:name=".Service.PressNotificationButtonReceiver"
+            android:exported="false"
+            android:enabled="true">
             <intent-filter>
-                <action android:name="Press_action_button" />
+                <action android:name="Press_time_action_button" />
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".Service.StartTimeServiceReceiver"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="Start_worktime_service" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".Service.StopTimeServiceReceiver"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="Stop_worktime_service" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

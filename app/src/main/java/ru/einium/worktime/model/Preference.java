@@ -1,14 +1,15 @@
 package ru.einium.worktime.model;
 
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
+import android.preference.PreferenceManager;
+
+import ru.einium.worktime.MyApplication;
 
 public class Preference {
     private SharedPreferences sp;
 
-    public Preference(Context context) {
-        sp = context.getSharedPreferences("timeState", Context.MODE_PRIVATE);
+    public Preference() {
+        sp = PreferenceManager.getDefaultSharedPreferences(MyApplication.getAppContext());
     }
 
     public void saveCurrentState(boolean isStarted,

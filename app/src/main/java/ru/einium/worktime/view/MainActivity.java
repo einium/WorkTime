@@ -3,12 +3,8 @@ package ru.einium.worktime.view;
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.databinding.DataBindingUtil;
-import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,14 +18,12 @@ import java.util.Locale;
 
 import ru.einium.worktime.Service.IManageServiceListener;
 import ru.einium.worktime.R;
-import ru.einium.worktime.Service.TimeManagementService;
 import ru.einium.worktime.databinding.ActivityMainBinding;
 import ru.einium.worktime.viewmodel.WorkTimeViewModel;
 
 public class MainActivity extends AppCompatActivity {
     private WorkTimeViewModel viewModel;
     private ActivityMainBinding binding;
-    private Intent serviceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +33,11 @@ public class MainActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         viewModel = ViewModelProviders.of(this).get(WorkTimeViewModel.class);
         binding.setViewmodel(viewModel);
-        serviceIntent = new Intent(getBaseContext(), TimeManagementService.class);
     }
 
     public void onClickButton(View view) {
         if (viewModel != null) {
-            viewModel.OnClickButton(this);
+            viewModel.OnClickButton();
         }
     }
 
@@ -52,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
             if (viewModel != null) {
-                viewModel.setNewWorkTime(hourOfDay, minute, getBaseContext());
+                viewModel.setNewWorkTime(hourOfDay, minute);
             }
         }
     };
@@ -72,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
             if (viewModel != null) {
-                viewModel.setStartTime(getBaseContext(), hourOfDay, minute);
+                viewModel.setStartTime(hourOfDay, minute);
             }
         }
     };
@@ -93,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d("logtag", "MainActivity onResume()");
         setObservers(viewModel, binding);
-        viewModel.loadSavedState(this);
+        viewModel.loadSavedState();
         if (viewModel.isStarted.getValue() != null && viewModel.isStarted.getValue()){
             if (viewModel.isPaused.getValue() != null && viewModel.isPaused.getValue()){
                 binding.button.setText(R.string.resume);
@@ -174,22 +167,25 @@ public class MainActivity extends AppCompatActivity {
         viewModel.setServiceListener(new IManageServiceListener() {
             @Override
             public void startService() {
-                if (serviceIntent != null){
-                    MainActivity.this.startService(serviceIntent);
-                    doBindService();
-                }
+                Log.d("logtag", "MainActivity sendBroadcastToStartService()");
+                sendBroadcastToStartService();
             }
             @Override
             public void stopService() {
-                if (serviceIntent != null){
-                    if (mBoundService != null) {
-                        mBoundService.stopShowingNotification();
-                    }
-                    doUnbindService();
-                    MainActivity.this.stopService(serviceIntent);
-                }
+                Log.d("logtag", "MainActivity sendBroadcastToStopService()");
+                sendBroadcastToStopService();
             }
         });
+    }
+
+    private void sendBroadcastToStartService() {
+        Intent intent = new Intent("Start_worktime_service");
+        sendBroadcast(intent);
+    }
+
+    private void sendBroadcastToStopService() {
+        Intent intent = new Intent("Stop_worktime_service");
+        sendBroadcast(intent);
     }
 
     private void setDateInTitle() {
@@ -200,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void resetTimer(View view) {
         if (viewModel != null) {
-            viewModel.resetTimer(this);
+            viewModel.resetTimer();
         }
     }
 
@@ -209,57 +205,7 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         Log.d("logtag", "MainActivity onSaveInstanceState()");
         if (viewModel != null) {
-            viewModel.saveCurrentState(this);
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d("logtag", "MainActivity onDestroy()");
-        doUnbindService();
-    }
-
-    private TimeManagementService mBoundService;
-    private boolean mIsBound;
-    private ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            //Log.d("logtag", "mConnection onServiceConnected()");
-            // This is called when the connection with the service has
-            // been established, giving us the service object we can use
-            // to interact with the service.  Because we have bound to a
-            // explicit service that we know is running in our own
-            // process, we can cast its IBinder to a concrete class and
-            // directly access it.
-            mBoundService = ((TimeManagementService.LocalBinder)service).getService();
-            mBoundService.startShowingNotification();
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            //Log.d("logtag", "mConnection onServiceDisconnected()");
-            // This is called when the connection with the service has
-            // been unexpectedly disconnected -- that is, its process
-            // crashed. Because it is running in our same process, we
-            // should never see this happen.
-            mBoundService = null;
-        }
-    };
-    void doBindService() {
-        //Log.d("logtag", "doBindService()");
-        // Establish a connection with the service.  We use an explicit
-        // class name because we want a specific service implementation
-        // that we know will be running in our own process (and thus
-        // won't be supporting component replacement by other applications).
-        bindService(new Intent(getBaseContext(), TimeManagementService.class),
-                mConnection, Context.BIND_AUTO_CREATE);
-        mIsBound = true;
-    }
-    void doUnbindService() {
-        //Log.d("logtag", "doUnbindService()");
-        if (mIsBound) {
-            // Detach our existing connection.
-            unbindService(mConnection);
-            mIsBound = false;
+            viewModel.saveCurrentState();
         }
     }
 

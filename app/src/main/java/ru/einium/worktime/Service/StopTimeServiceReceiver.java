@@ -5,10 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class BootReceiver extends BroadcastReceiver {
+public class StopTimeServiceReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("logtag", "BootReceiver onReceive()");
-        context.startService(new Intent(context, TimeManagementService.class));
+        Log.d("logtag", "StopTimeServiceReceiver onReceive()");
+        context.stopService(new Intent(context, TimeManagementService.class));
     }
 }

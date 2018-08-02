@@ -5,10 +5,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
@@ -16,6 +14,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import ru.einium.worktime.R;
+import ru.einium.worktime.model.Preference;
 import ru.einium.worktime.model.WorkTimeModel;
 import ru.einium.worktime.view.MainActivity;
 import ru.einium.worktime.viewmodel.IChangeTimeListener;
@@ -27,14 +26,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class TimeManagementService extends Service {
-
-    private final IBinder binder = new LocalBinder();
-    public class LocalBinder extends Binder {
-        public TimeManagementService getService() {
-            return TimeManagementService.this;
-        }
-    }
-    private boolean isShowNotification = true;
     private CharSequence channelName = "time";
     public static int notificationID = 13056;
     private String workTime = "";
@@ -80,15 +71,19 @@ public class TimeManagementService extends Service {
     public TimeManagementService() {
         Log.d("logtag", "TimeManagementService()");
         model = WorkTimeModel.getInstance();
+        if (model.getGlobalStartTime() == 0) {
+            model.loadSavedState(new Preference());
+        }
         model.addListener(listener);
     }
 
-    public void startShowingNotification() {
-        isShowNotification = true;
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
     }
 
     private void show(){
-        if (isShowNotification) {
+        if (model != null && model.isStarted) {
             createNotification();
         }
         if (notificationManager != null && notification != null) {
@@ -142,19 +137,14 @@ public class TimeManagementService extends Service {
         } else {
             btnText = getResources().getString(R.string.resume);
         }
-        notificationLayout.setTextViewText(R.id.tv_notif_btn, btnText);
+        notificationLayout.setTextViewText(R.id.btn_notif_action, btnText);
 
-        Intent button = new Intent("Press_action_button");
+        Intent button = new Intent("Press_time_action_button");
         button.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, button, 0);
 
-        notificationLayout.setOnClickPendingIntent(R.id.tv_notif_btn, pendingIntent);
+        notificationLayout.setOnClickPendingIntent(R.id.btn_notif_action, pendingIntent);
         return notificationLayout;
-    }
-
-    public void stopShowingNotification() {
-        isShowNotification = false;
-        dismisNotification();
     }
 
     private void dismisNotification() {
@@ -166,8 +156,7 @@ public class TimeManagementService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d("logtag", "TimeManagementService onBind()");
-        return binder;
+        return null;
     }
 
     private String convertTimeToString(long time) {
@@ -181,12 +170,13 @@ public class TimeManagementService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d("logtag", "TimeManagementService onDestroy()");
-        Intent serviceIntent = new Intent(getBaseContext(), TimeManagementService.class);
-        if (model.isStarted) {
-            startService(serviceIntent);
-        }
         model.removeListener(listener);
-        dismisNotification();
+        if (model.isStarted) {
+            Intent intent = new Intent("Start_worktime_service");
+            sendBroadcast(intent);
+        } else {
+            dismisNotification();
+        }
     }
 }
 
