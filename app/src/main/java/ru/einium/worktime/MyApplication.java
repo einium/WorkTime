@@ -14,8 +14,6 @@ public class MyApplication extends Application {
     }
 
     public static Context getAppContext() {
-        Log.d("logtag", "MyApplication getAppContext()");
         return context;
     }
-
 }

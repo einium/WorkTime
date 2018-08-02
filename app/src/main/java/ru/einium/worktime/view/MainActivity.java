@@ -198,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
         if (viewModel != null) {
             viewModel.resetTimer();
         }
+        finish();
     }
 
     @Override
