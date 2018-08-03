@@ -18,7 +18,7 @@ import java.util.TimeZone;
 public class WorkTimeViewModel extends ViewModel {
     private int msInHour = 3600000;
     private int msInMinute = 60000;
-    private String defValue = "--:--";
+    private String defValue = "--:--:--";
     private WorkTimeModel model;
     private IManageServiceListener serviceListener;
 

@@ -15,6 +15,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class WorkTimeModel {
+    private final Object locker = new Object();
     private static WorkTimeModel currentModel;
     public static WorkTimeModel getInstance(){
         if (currentModel == null) {
@@ -250,16 +251,18 @@ public class WorkTimeModel {
     }
 
     private void notifyListeners(){
-        for (IChangeTimeListener listener : listeners) {
-            listener.OnStartTimeChange(globalStartTime);
-            listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
-            listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
-            if (getOverTime() == 0) {
-                listener.OnStopTimeChange(getStopTime());
+        synchronized (locker) {
+            for (IChangeTimeListener listener : listeners) {
+                listener.OnStartTimeChange(globalStartTime);
+                listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
+                listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
+                if (getOverTime() == 0) {
+                    listener.OnStopTimeChange(getStopTime());
+                }
+                listener.OnOverTimeChange(getOverTime());
+                listener.OnPausedChanged(isPaused);
+                listener.OnStartedChanged(isStarted);
             }
-            listener.OnOverTimeChange(getOverTime());
-            listener.OnPausedChanged(isPaused);
-            listener.OnStartedChanged(isStarted);
         }
     }
 }

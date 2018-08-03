@@ -1,5 +1,6 @@
 package ru.einium.worktime.Service;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -27,11 +28,13 @@ import java.util.TimeZone;
 
 public class TimeManagementService extends Service {
     private CharSequence channelName = "time";
+    private String CHANNEL_ID = "work_time_channel";
     public static int notificationID = 13056;
     private String workTime = "";
     private String timeOut = "";
-    private Notification notification;
+    private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
+    private RemoteViews notificationLayout;
     private WorkTimeModel model;
 
     private IChangeTimeListener listener = new IChangeTimeListener(){
@@ -83,52 +86,39 @@ public class TimeManagementService extends Service {
     }
 
     private void show(){
-        if (model != null && model.isStarted) {
-            createNotification();
+        if (notificationManager == null) {
+            notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH);
+                notificationManager.createNotificationChannel(channel);
+            }
         }
-        if (notificationManager != null && notification != null) {
-            notificationManager.notify(notificationID, notification);
-        }
+        notificationManager.notify(notificationID, createNotification());
     }
-    private void createNotification() {
+
+    private Notification createNotification() {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 4445, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        RemoteViews notificationContent = createNotificationLayout();
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        String notificationTitle = "WorkTime";
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            String CHANNEL_ID = "work_time_channel";
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setContentIntent(pendingIntent)
-                    .setContentTitle(notificationTitle)
-                    .setContentText(workTime)
-                    .setContent(notificationContent)
-                    .setSmallIcon(R.drawable.notidication_icon)
-                    .setWhen(System.currentTimeMillis())
+        if (notificationBuilder == null) {
+            notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setContentTitle("WorkTime")
                     .setAutoCancel(true)
-                    .setChannelId(CHANNEL_ID);
-            notification = builder.build();
-            if (notificationManager != null) {
-                int importance = NotificationManager.IMPORTANCE_HIGH;
-                NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, importance);
-                notificationManager.createNotificationChannel(channel);
-            }
-        } else {
-            Notification.Builder builder = new Notification.Builder(this);
-            builder.setContentIntent(pendingIntent)
-                    .setContentTitle(notificationTitle)
-                    .setContentText(workTime)
-                    .setContent(notificationContent)
-                    .setWhen(System.currentTimeMillis())
+                    .setChannelId(CHANNEL_ID)
                     .setSmallIcon(R.drawable.notidication_icon)
-                    .setAutoCancel(true);
-            notification = builder.build();
+                    .setOngoing(true);
         }
+        updateNotificationLayout();
+        notificationBuilder.setContentIntent(pendingIntent)
+                .setContent(notificationLayout)
+                .setWhen(System.currentTimeMillis());
+        return notificationBuilder.build();
     }
 
-    private RemoteViews createNotificationLayout(){
-        RemoteViews notificationLayout = new RemoteViews(getPackageName(), R.layout.notification);
+    private void updateNotificationLayout(){
+        if (notificationLayout == null) {
+            notificationLayout = new RemoteViews(getPackageName(), R.layout.notification);
+        }
         notificationLayout.setTextViewText(R.id.tv_notif_workTimeValue, workTime);
         notificationLayout.setTextViewText(R.id.tv_notif_timeOutValue, timeOut);
         String btnText;
@@ -139,12 +129,10 @@ public class TimeManagementService extends Service {
         }
         notificationLayout.setTextViewText(R.id.btn_notif_action, btnText);
 
-        Intent button = new Intent("Press_time_action_button");
-        button.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, button, 0);
-
-        notificationLayout.setOnClickPendingIntent(R.id.btn_notif_action, pendingIntent);
-        return notificationLayout;
+        Intent actionButtonIntent = new Intent("Press_time_action_button");
+        actionButtonIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent actionButtonPendingIntent = PendingIntent.getBroadcast(this, 0, actionButtonIntent, 0);
+        notificationLayout.setOnClickPendingIntent(R.id.btn_notif_action, actionButtonPendingIntent);
     }
 
     private void dismisNotification() {
@@ -160,7 +148,7 @@ public class TimeManagementService extends Service {
     }
 
     private String convertTimeToString(long time) {
-        if (time == 0) return "--:--";
+        if (time == 0) return "--:--:--";
         DateFormat formatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         return formatter.format(new Date(time));
@@ -173,6 +161,22 @@ public class TimeManagementService extends Service {
         model.removeListener(listener);
         if (model.isStarted) {
             Intent intent = new Intent("Start_worktime_service");
+            sendBroadcast(intent);
+        } else {
+            dismisNotification();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        Log.i("logtag", "TimeManagementService onTaskRemoved");
+        model.removeListener(listener);
+        if (model.isStarted) {
+            Log.i("logtag", "           model.isStarted");
+            Intent intent = new Intent("Start_worktime_service");
+            Log.i("logtag", "           sendBroadcast()");
             sendBroadcast(intent);
         } else {
             dismisNotification();
