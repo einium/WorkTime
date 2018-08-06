@@ -16,8 +16,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+import ru.einium.worktime.BuildConfig;
 import ru.einium.worktime.Service.IManageServiceListener;
 import ru.einium.worktime.R;
+import ru.einium.worktime.Service.TimeManagementService;
 import ru.einium.worktime.databinding.ActivityMainBinding;
 import ru.einium.worktime.viewmodel.WorkTimeViewModel;
 
@@ -167,25 +169,33 @@ public class MainActivity extends AppCompatActivity {
         viewModel.setServiceListener(new IManageServiceListener() {
             @Override
             public void startService() {
-                Log.d("logtag", "MainActivity sendBroadcastToStartService()");
-                sendBroadcastToStartService();
+                Log.d("logtag", "MainActivity startTimeService()");
+                startTimeService();
             }
             @Override
             public void stopService() {
-                Log.d("logtag", "MainActivity sendBroadcastToStopService()");
-                sendBroadcastToStopService();
+                Log.d("logtag", "MainActivity stopTimeService()");
+                stopTimeService();
             }
         });
     }
 
-    private void sendBroadcastToStartService() {
-        Intent intent = new Intent("Start_worktime_service");
-        sendBroadcast(intent);
+    private void startTimeService() {
+        if (BuildConfig.FLAVOR.equals("directStartService")){
+            startService(new Intent(this, TimeManagementService.class));
+        } else {
+            Intent intent = new Intent("Start_worktime_service");
+            sendBroadcast(intent);
+        }
     }
 
-    private void sendBroadcastToStopService() {
-        Intent intent = new Intent("Stop_worktime_service");
-        sendBroadcast(intent);
+    private void stopTimeService() {
+        if (BuildConfig.FLAVOR.equals("directStartService")){
+            stopService(new Intent(this, TimeManagementService.class));
+        } else {
+            Intent intent = new Intent("Stop_worktime_service");
+            sendBroadcast(intent);
+        }
     }
 
     private void setDateInTitle() {

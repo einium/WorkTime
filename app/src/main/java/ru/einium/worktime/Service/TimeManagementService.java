@@ -14,6 +14,8 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import ru.einium.worktime.BuildConfig;
+import ru.einium.worktime.MyApplication;
 import ru.einium.worktime.R;
 import ru.einium.worktime.model.Preference;
 import ru.einium.worktime.model.WorkTimeModel;
@@ -160,8 +162,12 @@ public class TimeManagementService extends Service {
         Log.d("logtag", "TimeManagementService onDestroy()");
         model.removeListener(listener);
         if (model.isStarted) {
-            Intent intent = new Intent("Start_worktime_service");
-            sendBroadcast(intent);
+            if (BuildConfig.FLAVOR.equals("directStartService")){
+                startService(new Intent(MyApplication.getAppContext(), TimeManagementService.class));
+            } else {
+                Intent intent = new Intent("Start_worktime_service");
+                sendBroadcast(intent);
+            }
         } else {
             dismisNotification();
         }
@@ -174,10 +180,12 @@ public class TimeManagementService extends Service {
         Log.i("logtag", "TimeManagementService onTaskRemoved");
         model.removeListener(listener);
         if (model.isStarted) {
-            Log.i("logtag", "           model.isStarted");
-            Intent intent = new Intent("Start_worktime_service");
-            Log.i("logtag", "           sendBroadcast()");
-            sendBroadcast(intent);
+            if (BuildConfig.FLAVOR.equals("directStartService")){
+                startService(new Intent(MyApplication.getAppContext(), TimeManagementService.class));
+            } else {
+                Intent intent = new Intent("Start_worktime_service");
+                sendBroadcast(intent);
+            }
         } else {
             dismisNotification();
         }

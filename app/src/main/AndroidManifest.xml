@@ -28,7 +28,8 @@
         <receiver
             android:name=".Service.BootReceiver"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
-            android:enabled="true">
+            android:enabled="true"
+            android:exported="true">
 
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -40,7 +41,7 @@
 
         <receiver
             android:name=".Service.PressNotificationButtonReceiver"
-            android:exported="false"
+            android:exported="true"
             android:enabled="true">
             <intent-filter>
                 <action android:name="Press_time_action_button" />
@@ -49,7 +50,7 @@
 
         <receiver
             android:name=".Service.StartTimeServiceReceiver"
-            android:exported="false"
+            android:exported="true"
             android:enabled="true">
             <intent-filter>
                 <action android:name="Start_worktime_service" />
@@ -58,7 +59,7 @@
 
         <receiver
             android:name=".Service.StopTimeServiceReceiver"
-            android:exported="false"
+            android:exported="true"
             android:enabled="true">
             <intent-filter>
                 <action android:name="Stop_worktime_service" />
