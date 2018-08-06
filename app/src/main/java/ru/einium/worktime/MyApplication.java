@@ -10,7 +10,9 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         Log.d("logtag", "MyApplication onCreate()");
-        context = getApplicationContext();
+        if (BuildConfig.FLAVOR.equals("broadcastStartService")) {
+            context = getApplicationContext();
+        }
     }
 
     public static Context getAppContext() {

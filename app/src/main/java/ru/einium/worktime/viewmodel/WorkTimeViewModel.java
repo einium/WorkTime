@@ -2,6 +2,7 @@ package ru.einium.worktime.viewmodel;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.Context;
 import android.util.Log;
 
 import ru.einium.worktime.Service.IManageServiceListener;
@@ -16,8 +17,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class WorkTimeViewModel extends ViewModel {
-    private int msInHour = 3600000;
-    private int msInMinute = 60000;
     private String defValue = "--:--:--";
     private WorkTimeModel model;
     private IManageServiceListener serviceListener;
@@ -78,11 +77,11 @@ public class WorkTimeViewModel extends ViewModel {
            });
     }
 
-    public void loadSavedState(){
+    public void loadSavedState(Context context){
         if (model != null) {
             if (model.getGlobalStartTime() == 0){
                 Log.d("logtag", "model.loadSavedState()");
-                model.loadSavedState(new Preference());
+                model.loadSavedState(new Preference(context));
                 workDayText.postValue(convertTimeToStringCorrectly(getWorkDayHours(), getWorkDayMinutes()));
                 if (serviceListener != null && model.isStarted) {
                     serviceListener.startService();
@@ -91,7 +90,7 @@ public class WorkTimeViewModel extends ViewModel {
         }
     }
 
-    public void OnClickButton() {
+    public void OnClickButton(Context context) {
         Log.d("logtag", "WorkTimeViewModel OnClickButton()");
         if (!model.isStarted) {
             model.Start();
@@ -105,7 +104,7 @@ public class WorkTimeViewModel extends ViewModel {
                 model.Resume();
             }
         }
-        model.saveCurrentState(new Preference());
+        model.saveCurrentState(new Preference(context));
     }
 
     private String convertTimeToString(long time, boolean setTimeZone) {
@@ -120,39 +119,39 @@ public class WorkTimeViewModel extends ViewModel {
         long workDay = 0;
         if (model != null)
             workDay = model.getWorkDayInMillis();
-        return (int) workDay / msInHour;
+        return (int) workDay / 3600000;     //3600000 - ms in 1 hour
     }
 
     public int getWorkDayMinutes() {
         long workDay = 0;
         if (model != null)
             workDay = model.getWorkDayInMillis();
-        int hours = (int) workDay / msInHour;
-        return (int) (workDay - hours*msInHour)/msInMinute;
+        int hours = (int) workDay / 3600000;
+        return (int) (workDay - hours*3600000)/60000;   //60000 - ms in 1 minute
     }
 
-    public void setNewWorkTime(int hourOfDay, int minute) {
-        long workTimeInMillis = hourOfDay*msInHour + minute*msInMinute;
+    public void setNewWorkTime(int hourOfDay, int minute, Context context) {
+        long workTimeInMillis = hourOfDay*3600000 + minute*60000;
         if (model != null){
             model.setWorkTimeInMillis(workTimeInMillis);
-            model.saveCurrentState(new Preference());
+            model.saveCurrentState(new Preference(context));
         }
         workDayText.setValue(convertTimeToStringCorrectly(hourOfDay, minute));
     }
 
     public int getStartTimeHour() {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(model.getStartTime());
+        calendar.setTimeInMillis(model.getGlobalStartTime());
         return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
     public int getStartTimeMinute() {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(model.getStartTime());
+        calendar.setTimeInMillis(model.getGlobalStartTime());
         return calendar.get(Calendar.MINUTE);
     }
 
-    public void setStartTime(int hourOfDay, int minute) {
+    public void setStartTime(int hourOfDay, int minute, Context context) {
         Calendar newStartTime = Calendar.getInstance();
         newStartTime.setTimeInMillis(System.currentTimeMillis());
         newStartTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
@@ -169,7 +168,7 @@ public class WorkTimeViewModel extends ViewModel {
             } else {
                 model.setStartTime(maxAllowedTime);
             }
-            model.saveCurrentState(new Preference());
+            model.saveCurrentState(new Preference(context));
         }
     }
 
@@ -180,11 +179,11 @@ public class WorkTimeViewModel extends ViewModel {
         return String.valueOf(hourOfDay) + ":" + String.valueOf(minute);
     }
 
-    public void resetTimer() {
+    public void resetTimer(Context context) {
         Log.d("logtag", "WorkTimeViewModel resetTimer()");
         if (model != null) {
             model.reset();
-            model.saveCurrentState(new Preference());
+            model.saveCurrentState(new Preference(context));
 
             startTimeText.setValue(convertTimeToString(0, false));
             if (serviceListener != null){
@@ -199,9 +198,9 @@ public class WorkTimeViewModel extends ViewModel {
         }
     }
 
-    public void saveCurrentState() {
+    public void saveCurrentState(Context context) {
         if (model != null) {
-            model.saveCurrentState(new Preference());
+            model.saveCurrentState(new Preference(context));
         }
     }
 }

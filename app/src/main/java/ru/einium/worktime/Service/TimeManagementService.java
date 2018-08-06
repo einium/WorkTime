@@ -77,7 +77,7 @@ public class TimeManagementService extends Service {
         Log.d("logtag", "TimeManagementService()");
         model = WorkTimeModel.getInstance();
         if (model.getGlobalStartTime() == 0) {
-            model.loadSavedState(new Preference());
+            model.loadSavedState(new Preference(this));
         }
         model.addListener(listener);
     }
@@ -100,7 +100,7 @@ public class TimeManagementService extends Service {
 
     private Notification createNotification() {
         Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 4445, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 4445, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         if (notificationBuilder == null) {
             notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -181,7 +181,7 @@ public class TimeManagementService extends Service {
         model.removeListener(listener);
         if (model.isStarted) {
             if (BuildConfig.FLAVOR.equals("directStartService")){
-                startService(new Intent(MyApplication.getAppContext(), TimeManagementService.class));
+                startService(new Intent(this, TimeManagementService.class));
             } else {
                 Intent intent = new Intent("Start_worktime_service");
                 sendBroadcast(intent);

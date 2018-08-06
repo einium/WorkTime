@@ -41,7 +41,7 @@ public class WorkTimeModel {
     private long commonTimeOut;
     private long currentTimeOut;
 
-    private WorkTimeModel() {
+    public WorkTimeModel() {
         isStarted = false;
         globalStartTime = 0;
         currentStartTime = 0;
@@ -53,7 +53,7 @@ public class WorkTimeModel {
         currentTimeOut = 0;
     }
 
-    public void Start(){
+    public void Start() {
         isStarted = true;
         globalStartTime = System.currentTimeMillis();
         currentStartTime = System.currentTimeMillis();
@@ -65,7 +65,7 @@ public class WorkTimeModel {
         notifyListeners();
     }
 
-    public void Pause(){
+    public void Pause() {
         isPaused = true;
         commonWorkTime += currentWorkTime;
         currentWorkTime = 0;
@@ -197,7 +197,7 @@ public class WorkTimeModel {
         }
     }
 
-    public void loadSavedState(Preference prefs){
+    public void loadSavedState(Preference prefs) {
         Log.d("logtag", "WorkTimeModel loadSavedState()");
         globalStartTime = prefs.loadGlobalStartTime();
         boolean isNewDay = checkForNewDay(globalStartTime);
@@ -242,15 +242,11 @@ public class WorkTimeModel {
         return globalStartTime;
     }
 
-    public long getStartTime() {
-        return globalStartTime;
-    }
-
     public long getMaxAllowedStartTime() {
         return System.currentTimeMillis() - commonTimeOut;
     }
 
-    private void notifyListeners(){
+    private void notifyListeners() {
         synchronized (locker) {
             for (IChangeTimeListener listener : listeners) {
                 listener.OnStartTimeChange(globalStartTime);

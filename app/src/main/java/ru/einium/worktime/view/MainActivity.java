@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickButton(View view) {
         if (viewModel != null) {
-            viewModel.OnClickButton();
+            viewModel.OnClickButton(this);
         }
     }
 
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
             if (viewModel != null) {
-                viewModel.setNewWorkTime(hourOfDay, minute);
+                viewModel.setNewWorkTime(hourOfDay, minute, MainActivity.this);
             }
         }
     };
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
             if (viewModel != null) {
-                viewModel.setStartTime(hourOfDay, minute);
+                viewModel.setStartTime(hourOfDay, minute, MainActivity.this);
             }
         }
     };
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d("logtag", "MainActivity onResume()");
         setObservers(viewModel, binding);
-        viewModel.loadSavedState();
+        viewModel.loadSavedState(this);
         if (viewModel.isStarted.getValue() != null && viewModel.isStarted.getValue()){
             if (viewModel.isPaused.getValue() != null && viewModel.isPaused.getValue()){
                 binding.button.setText(R.string.resume);
@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void resetTimer(View view) {
         if (viewModel != null) {
-            viewModel.resetTimer();
+            viewModel.resetTimer(this);
         }
         finish();
     }
@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         Log.d("logtag", "MainActivity onSaveInstanceState()");
         if (viewModel != null) {
-            viewModel.saveCurrentState();
+            viewModel.saveCurrentState(this);
         }
     }
 
