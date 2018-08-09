@@ -1,7 +1,6 @@
 package ru.einium.worktime.Service;
 
 import android.annotation.TargetApi;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -30,13 +29,9 @@ import java.util.TimeZone;
 
 public class TimeManagementService extends Service {
     private CharSequence channelName = "time";
-    private String CHANNEL_ID = "work_time_channel";
     public static int notificationID = 13056;
     private String workTime = "";
     private String timeOut = "";
-    private NotificationCompat.Builder notificationBuilder;
-    private NotificationManager notificationManager;
-    private RemoteViews notificationLayout;
     private WorkTimeModel model;
 
     private IChangeTimeListener listener = new IChangeTimeListener(){
@@ -47,13 +42,13 @@ public class TimeManagementService extends Service {
         @Override
         public void OnWorkingTimeChange(Long time) {
             workTime = convertTimeToString(time);
-            show();
+            showNotification();
         }
 
         @Override
         public void OnTimeOutChange(Long time) {
             timeOut = convertTimeToString(time);
-            show();
+            showNotification();
         }
 
         @Override
@@ -87,40 +82,34 @@ public class TimeManagementService extends Service {
         return START_STICKY;
     }
 
-    private void show(){
-        if (notificationManager == null) {
-            notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    private void showNotification() {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            String CHANNEL_ID = "work_time_channel";
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH);
                 notificationManager.createNotificationChannel(channel);
             }
-        }
-        notificationManager.notify(notificationID, createNotification());
-    }
 
-    private Notification createNotification() {
-        Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 4445, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent intent = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 4445, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        if (notificationBuilder == null) {
-            notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentTitle("WorkTime")
                     .setAutoCancel(true)
                     .setChannelId(CHANNEL_ID)
-                    .setSmallIcon(R.drawable.notidication_icon)
-                    .setOngoing(true);
+                    .setSmallIcon(R.drawable.notidication_icon);
+
+            RemoteViews notificationLayout = createNotificationLayout();
+            notificationBuilder.setContentIntent(pendingIntent)
+                    .setContent(notificationLayout)
+                    .setWhen(System.currentTimeMillis());
+            notificationManager.notify(notificationID, notificationBuilder.build());
         }
-        updateNotificationLayout();
-        notificationBuilder.setContentIntent(pendingIntent)
-                .setContent(notificationLayout)
-                .setWhen(System.currentTimeMillis());
-        return notificationBuilder.build();
     }
 
-    private void updateNotificationLayout(){
-        if (notificationLayout == null) {
-            notificationLayout = new RemoteViews(getPackageName(), R.layout.notification);
-        }
+    private RemoteViews createNotificationLayout(){
+        RemoteViews notificationLayout = new RemoteViews(getPackageName(), R.layout.notification);
         notificationLayout.setTextViewText(R.id.tv_notif_workTimeValue, workTime);
         notificationLayout.setTextViewText(R.id.tv_notif_timeOutValue, timeOut);
         String btnText;
@@ -130,11 +119,11 @@ public class TimeManagementService extends Service {
             btnText = getResources().getString(R.string.resume);
         }
         notificationLayout.setTextViewText(R.id.btn_notif_action, btnText);
-
         Intent actionButtonIntent = new Intent("Press_time_action_button");
         actionButtonIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent actionButtonPendingIntent = PendingIntent.getBroadcast(this, 0, actionButtonIntent, 0);
         notificationLayout.setOnClickPendingIntent(R.id.btn_notif_action, actionButtonPendingIntent);
+        return notificationLayout;
     }
 
     private void dismisNotification() {
