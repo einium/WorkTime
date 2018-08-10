@@ -50,6 +50,12 @@ public class SettingActivity extends AppCompatActivity {
         addClickListeners();
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
     private void setCheckBoxColor() {
         ColorStateList colorStateList = new ColorStateList(
                 new int[][]{
