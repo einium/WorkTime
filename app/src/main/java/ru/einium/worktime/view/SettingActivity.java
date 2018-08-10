@@ -225,19 +225,19 @@ public class SettingActivity extends AppCompatActivity {
         if (day != null) {
             switch (day) {
                 case monday:
-                    return TimeFormatUtils.getHoursInTime(setting.getMondayInSec());
+                    return TimeFormatUtils.getHoursInTime(setting.getMondayInSec()*1000);
                 case tuesday:
-                    return TimeFormatUtils.getHoursInTime(setting.getTuesdayInSec());
+                    return TimeFormatUtils.getHoursInTime(setting.getTuesdayInSec()*1000);
                 case wednesday:
-                    return TimeFormatUtils.getHoursInTime(setting.getWednesdayInSec());
+                    return TimeFormatUtils.getHoursInTime(setting.getWednesdayInSec()*1000);
                 case thursday:
-                    return TimeFormatUtils.getHoursInTime(setting.getThursdayInSec());
+                    return TimeFormatUtils.getHoursInTime(setting.getThursdayInSec()*1000);
                 case friday:
-                    return TimeFormatUtils.getHoursInTime(setting.getFridayInSec());
+                    return TimeFormatUtils.getHoursInTime(setting.getFridayInSec()*1000);
                 case saturday:
-                    return TimeFormatUtils.getHoursInTime(setting.getSaturdayInSec());
+                    return TimeFormatUtils.getHoursInTime(setting.getSaturdayInSec()*1000);
                 case sunday:
-                    return TimeFormatUtils.getHoursInTime(setting.getSundayInSec());
+                    return TimeFormatUtils.getHoursInTime(setting.getSundayInSec()*1000);
             }
         }
         return 0;
@@ -247,19 +247,19 @@ public class SettingActivity extends AppCompatActivity {
         if (day != null) {
             switch (day) {
                 case monday:
-                    return TimeFormatUtils.getMinutesInTime(setting.getMondayInSec());
+                    return TimeFormatUtils.getMinutesInTime(setting.getMondayInSec()*1000);
                 case tuesday:
-                    return TimeFormatUtils.getMinutesInTime(setting.getTuesdayInSec());
+                    return TimeFormatUtils.getMinutesInTime(setting.getTuesdayInSec()*1000);
                 case wednesday:
-                    return TimeFormatUtils.getMinutesInTime(setting.getWednesdayInSec());
+                    return TimeFormatUtils.getMinutesInTime(setting.getWednesdayInSec()*1000);
                 case thursday:
-                    return TimeFormatUtils.getMinutesInTime(setting.getThursdayInSec());
+                    return TimeFormatUtils.getMinutesInTime(setting.getThursdayInSec()*1000);
                 case friday:
-                    return TimeFormatUtils.getMinutesInTime(setting.getFridayInSec());
+                    return TimeFormatUtils.getMinutesInTime(setting.getFridayInSec()*1000);
                 case saturday:
-                    return TimeFormatUtils.getMinutesInTime(setting.getSaturdayInSec());
+                    return TimeFormatUtils.getMinutesInTime(setting.getSaturdayInSec()*1000);
                 case sunday:
-                    return TimeFormatUtils.getMinutesInTime(setting.getSundayInSec());
+                    return TimeFormatUtils.getMinutesInTime(setting.getSundayInSec()*1000);
             }
         }
         return 0;

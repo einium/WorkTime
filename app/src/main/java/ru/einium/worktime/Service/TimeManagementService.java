@@ -8,6 +8,8 @@ import android.app.Service;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
@@ -109,12 +111,11 @@ public class TimeManagementService extends Service {
 
             Intent intent = new Intent(this, MainActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 4445, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentTitle("WorkTime")
                     .setAutoCancel(true)
                     .setChannelId(CHANNEL_ID)
-                    .setSmallIcon(R.drawable.notidication_icon);
+                    .setSmallIcon(R.drawable.notif_icon);
 
             RemoteViews notificationLayout = createNotificationLayout();
             notificationBuilder.setContentIntent(pendingIntent)
