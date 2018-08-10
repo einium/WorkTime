@@ -22,7 +22,7 @@ public class WorkTimeModel {
         }
         return currentModel;
     }
-
+    private AppPreference setting = AppPreference.getInstance();
     private long customWorkTime = 0;
     private List<IChangeTimeListener> listeners = new ArrayList<>();
 
@@ -81,19 +81,23 @@ public class WorkTimeModel {
 
     public long getWorkDayInMillis() {
         if (customWorkTime != 0) return customWorkTime;
-
-        int hour = 3600000;
-        int minute = 60000;
         Calendar calendar = Calendar.getInstance();
         int day = calendar.get(Calendar.DAY_OF_WEEK);
         switch (day) {
             case Calendar.MONDAY:
+                return setting.getMondayInSec()*1000L;
             case Calendar.TUESDAY:
+                return setting.getTuesdayInSec()*1000L;
             case Calendar.WEDNESDAY:
+                return setting.getWednesdayInSec()*1000L;
             case Calendar.THURSDAY:
-                return 8*hour + 15*minute;
+                return setting.getThursdayInSec()*1000L;
             case Calendar.FRIDAY:
-                return 7*hour;
+                return setting.getFridayInSec()*1000L;
+            case Calendar.SATURDAY:
+                return setting.getSaturdayInSec()*1000L;
+            case Calendar.SUNDAY:
+                return setting.getSundayInSec()*1000L;
             default: return 0;
         }
     }
@@ -168,7 +172,7 @@ public class WorkTimeModel {
         };
     }
 
-    public void saveCurrentState(Preference pref) {
+    public void saveCurrentState(TimePreference pref) {
         Log.d("logtag", "WorkTimeModel saveCurrentState()");
         if (isStarted){
             pref.saveCurrentState(true,
@@ -195,7 +199,7 @@ public class WorkTimeModel {
         }
     }
 
-    public void loadSavedState(Preference prefs) {
+    public void loadSavedState(TimePreference prefs) {
         Log.d("logtag", "WorkTimeModel loadSavedState()");
         globalStartTime = prefs.loadGlobalStartTime();
         boolean isNewDay = checkForNewDay(globalStartTime);

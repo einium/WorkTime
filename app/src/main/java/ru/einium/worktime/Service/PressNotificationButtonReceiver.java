@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import ru.einium.worktime.model.Preference;
+import ru.einium.worktime.model.TimePreference;
 import ru.einium.worktime.model.WorkTimeModel;
 
 public class PressNotificationButtonReceiver  extends BroadcastReceiver {
@@ -18,6 +18,6 @@ public class PressNotificationButtonReceiver  extends BroadcastReceiver {
                 model.Resume();
             }
         }
-        model.saveCurrentState(new Preference(context));
+        model.saveCurrentState(new TimePreference());
     }
 }

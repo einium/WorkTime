@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ru.einium.worktime">
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
@@ -10,12 +11,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <activity android:name=".view.MainActivity"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTop">
+        <activity
+            android:name=".view.MainActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -23,47 +25,32 @@
         <service
             android:name=".Service.TimeManagementService"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
 
         <receiver
             android:name=".Service.BootReceiver"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
             android:enabled="true"
-            android:exported="true">
-
+            android:exported="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-                <action android:name="android.intent.action.REBOOT"/>
+                <action android:name="android.intent.action.REBOOT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".Service.PressNotificationButtonReceiver"
-            android:exported="true"
-            android:enabled="true">
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="Press_time_action_button" />
             </intent-filter>
         </receiver>
 
-        <receiver
-            android:name=".Service.StartTimeServiceReceiver"
-            android:exported="true"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="Start_worktime_service" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name=".Service.StopTimeServiceReceiver"
-            android:exported="true"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="Stop_worktime_service" />
-            </intent-filter>
-        </receiver>
+        <activity
+            android:name=".view.SettingActivity"
+            android:label="@string/title_activity_settings" />
     </application>
 </manifest>

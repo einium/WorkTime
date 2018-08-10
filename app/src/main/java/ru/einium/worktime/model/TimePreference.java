@@ -1,20 +1,15 @@
 package ru.einium.worktime.model;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import ru.einium.worktime.BuildConfig;
 import ru.einium.worktime.MyApplication;
 
-public class Preference {
+public class TimePreference {
     private SharedPreferences sp;
 
-    public Preference(Context context) {
-        if (BuildConfig.FLAVOR.equals("broadcastStartService")) {
-            context = MyApplication.getAppContext();
-        }
-        sp = PreferenceManager.getDefaultSharedPreferences(context);
+    public TimePreference() {
+        sp = PreferenceManager.getDefaultSharedPreferences(MyApplication.getAppContext());
     }
 
     public void saveCurrentState(boolean isStarted,

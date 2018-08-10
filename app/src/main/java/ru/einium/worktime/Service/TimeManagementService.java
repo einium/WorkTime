@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -13,10 +14,9 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import ru.einium.worktime.BuildConfig;
-import ru.einium.worktime.MyApplication;
 import ru.einium.worktime.R;
-import ru.einium.worktime.model.Preference;
+import ru.einium.worktime.model.AppPreference;
+import ru.einium.worktime.model.TimePreference;
 import ru.einium.worktime.model.WorkTimeModel;
 import ru.einium.worktime.view.MainActivity;
 import ru.einium.worktime.viewmodel.IChangeTimeListener;
@@ -28,12 +28,12 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class TimeManagementService extends Service {
+    private AppPreference setting = AppPreference.getInstance();
     private CharSequence channelName = "time";
     public static int notificationID = 13056;
     private String workTime = "";
     private String timeOut = "";
     private WorkTimeModel model;
-
     private IChangeTimeListener listener = new IChangeTimeListener(){
         @Override
         public void OnStartTimeChange(Long time) {
@@ -42,13 +42,17 @@ public class TimeManagementService extends Service {
         @Override
         public void OnWorkingTimeChange(Long time) {
             workTime = convertTimeToString(time);
-            showNotification();
+            if (setting.isShowNotification()) {
+                showNotification();
+            }
         }
 
         @Override
         public void OnTimeOutChange(Long time) {
             timeOut = convertTimeToString(time);
-            showNotification();
+            if (setting.isShowNotification()) {
+                showNotification();
+            }
         }
 
         @Override
@@ -67,14 +71,26 @@ public class TimeManagementService extends Service {
         public void OnPausedChanged(boolean paused) {
         }
     };
+    private Observer<Boolean> changeShowNotificationObserver = new Observer<Boolean>() {
+        @Override
+        public void onChanged(Boolean b) {
+            if (b != null && !b) {
+                dismisNotification();
+            }
+        }
+    };
 
     public TimeManagementService() {
         Log.d("logtag", "TimeManagementService()");
         model = WorkTimeModel.getInstance();
         if (model.getGlobalStartTime() == 0) {
-            model.loadSavedState(new Preference(this));
+            model.loadSavedState(new TimePreference());
+        }
+        if (setting.needLoad()) {
+            setting.loadSetting();
         }
         model.addListener(listener);
+        setting.showNotification.observeForever(changeShowNotificationObserver);
     }
 
     @Override
@@ -150,13 +166,9 @@ public class TimeManagementService extends Service {
         super.onDestroy();
         Log.d("logtag", "TimeManagementService onDestroy()");
         model.removeListener(listener);
+        setting.showNotification.removeObserver(changeShowNotificationObserver);
         if (model.isStarted) {
-            if (BuildConfig.FLAVOR.equals("directStartService")){
-                startService(new Intent(MyApplication.getAppContext(), TimeManagementService.class));
-            } else {
-                Intent intent = new Intent("Start_worktime_service");
-                sendBroadcast(intent);
-            }
+            startService(new Intent(this, TimeManagementService.class));
         } else {
             dismisNotification();
         }
@@ -168,13 +180,9 @@ public class TimeManagementService extends Service {
         super.onTaskRemoved(rootIntent);
         Log.i("logtag", "TimeManagementService onTaskRemoved");
         model.removeListener(listener);
+        setting.showNotification.removeObserver(changeShowNotificationObserver);
         if (model.isStarted) {
-            if (BuildConfig.FLAVOR.equals("directStartService")){
-                startService(new Intent(this, TimeManagementService.class));
-            } else {
-                Intent intent = new Intent("Start_worktime_service");
-                sendBroadcast(intent);
-            }
+            startService(new Intent(this, TimeManagementService.class));
         } else {
             dismisNotification();
         }
