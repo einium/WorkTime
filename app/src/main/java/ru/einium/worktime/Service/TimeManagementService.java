@@ -144,9 +144,13 @@ public class TimeManagementService extends Service {
     }
 
     private void dismisNotification() {
-        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null) {
-            notificationManager.cancel(notificationID);
+        try {
+            NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                notificationManager.cancel(notificationID);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
     }
 
