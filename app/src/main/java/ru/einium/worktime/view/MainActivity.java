@@ -22,7 +22,7 @@ import ru.einium.worktime.Service.IManageServiceListener;
 import ru.einium.worktime.R;
 import ru.einium.worktime.Service.TimeManagementService;
 import ru.einium.worktime.databinding.ActivityMainBinding;
-import ru.einium.worktime.model.AppPreference;
+import ru.einium.worktime.AppPreference;
 import ru.einium.worktime.viewmodel.TimeFormatUtils;
 import ru.einium.worktime.viewmodel.WorkTimeViewModel;
 

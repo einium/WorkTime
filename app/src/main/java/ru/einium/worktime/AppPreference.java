@@ -1,11 +1,9 @@
-package ru.einium.worktime.model;
+package ru.einium.worktime;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
-import ru.einium.worktime.MyApplication;
 
 public class AppPreference {
     private static AppPreference instance;

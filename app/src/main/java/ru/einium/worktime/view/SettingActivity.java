@@ -16,7 +16,7 @@ import android.widget.CompoundButton;
 import android.widget.TimePicker;
 
 import ru.einium.worktime.R;
-import ru.einium.worktime.model.AppPreference;
+import ru.einium.worktime.AppPreference;
 import ru.einium.worktime.viewmodel.TimeFormatUtils;
 
 public class SettingActivity extends AppCompatActivity {

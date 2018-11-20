@@ -1,6 +1,8 @@
 package ru.einium.worktime.model;
 
 import android.util.Log;
+
+import ru.einium.worktime.AppPreference;
 import ru.einium.worktime.viewmodel.IChangeTimeListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
