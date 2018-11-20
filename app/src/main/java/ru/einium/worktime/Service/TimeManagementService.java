@@ -1,6 +1,5 @@
 package ru.einium.worktime.Service;
 
-import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -8,9 +7,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.arch.lifecycle.Observer;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class TimeManagementService extends Service {
+    private BroadcastReceiver receiver;
     private AppPreference setting = AppPreference.getInstance();
     private CharSequence channelName = "time";
     String CHANNEL_ID = "work_time_channel";
@@ -103,6 +104,9 @@ public class TimeManagementService extends Service {
         //NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         //Notification startNotification = createNotification(notificationManager);
         //startForeground(notificationID, startNotification);
+
+        receiver = new PressNotificationButtonReceiver();
+        registerReceiver(receiver, new IntentFilter("Press_time_action_button"));
         return START_STICKY;
     }
 
@@ -148,7 +152,8 @@ public class TimeManagementService extends Service {
             btnText = getResources().getString(R.string.resume);
         }
         notificationLayout.setTextViewText(R.id.btn_notif_action, btnText);
-        Intent actionButtonIntent = new Intent("Press_time_action_button");
+        Intent actionButtonIntent = new Intent(this, PressNotificationButtonReceiver.class);
+        actionButtonIntent.setAction("Press_time_action_button");
         actionButtonIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent actionButtonPendingIntent = PendingIntent.getBroadcast(this, 0, actionButtonIntent, 0);
         notificationLayout.setOnClickPendingIntent(R.id.btn_notif_action, actionButtonPendingIntent);
@@ -178,11 +183,13 @@ public class TimeManagementService extends Service {
         return formatter.format(new Date(time));
     }
 
-    /*@Override
+    @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d("logtag", "TimeManagementService onDestroy()");
-        model.removeListener(listener);
+        unregisterReceiver(receiver);
+
+        /*model.removeListener(listener);
         setting.showNotification.removeObserver(changeShowNotificationObserver);
         if (model.isStarted) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -192,8 +199,8 @@ public class TimeManagementService extends Service {
             }
         } else {
             dismisNotification();
-        }
-    }*/
+        }*/
+    }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
