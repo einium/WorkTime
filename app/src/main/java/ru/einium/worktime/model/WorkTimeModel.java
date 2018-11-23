@@ -167,8 +167,10 @@ public class WorkTimeModel {
                     long curTime = System.currentTimeMillis();
                     currentWorkTime = curTime - currentStartTime;
                     notifyListeners();
-                    checkForPeriodicSignal();
-                    checkForEndingSignal();
+                    if (setting.signalPeriod.getValue() != null && setting.signalPeriod.getValue() != 0)
+                        checkForPeriodicSignal();
+                    if (setting.endSignalPeriod.getValue() != null && setting.endSignalPeriod.getValue() != 0)
+                        checkForEndingSignal();
                 } else {
                     long curTime = System.currentTimeMillis();
                     currentTimeOut = curTime-currentTimeOutStartTime;
