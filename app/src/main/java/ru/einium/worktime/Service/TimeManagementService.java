@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -75,13 +76,30 @@ public class TimeManagementService extends Service {
         @Override
         public void OnPausedChanged(boolean paused) {
         }
-    };
-    private Observer<Boolean> changeShowNotificationObserver = new Observer<Boolean>() {
+
         @Override
-        public void onChanged(Boolean b) {
-            if (b != null && !b) {
-                dismisNotification();
+        public void OnPeriodicSignalCalled() {
+            Log.d("logtag", "OnPeriodicSignalCalled()");
+            Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            if (vibe != null) {
+                long[] pattern = { 0, 150, 100, 150, 100, 150};
+                vibe.vibrate(pattern, -1);
             }
+        }
+
+        @Override
+        public void OnPreEndSignalCalled() {
+            Log.d("logtag", "OnPreEndSignalCalled()");
+            Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            if (vibe != null) {
+                long[] pattern = { 0, 1000};
+                vibe.vibrate(pattern, -1);
+            }
+        }
+    };
+    private Observer<Boolean> changeShowNotificationObserver = b -> {
+        if (b != null && !b) {
+            dismisNotification();
         }
     };
 
@@ -188,10 +206,10 @@ public class TimeManagementService extends Service {
         super.onDestroy();
         Log.d("logtag", "TimeManagementService onDestroy()");
         unregisterReceiver(receiver);
-
-        /*model.removeListener(listener);
+        model.removeListener(listener);
         setting.showNotification.removeObserver(changeShowNotificationObserver);
-        if (model.isStarted) {
+
+        /*if (model.isStarted) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(new Intent(this, TimeManagementService.class));
             } else {

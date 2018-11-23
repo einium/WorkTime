@@ -51,6 +51,8 @@ public class WorkTimeModel {
         currentTimeOutStartTime = 0;
         commonTimeOut = 0;
         currentTimeOut = 0;
+        alreadyCalled = false;
+        endAlreadyCalled = false;
     }
 
     public void Start() {
@@ -165,6 +167,8 @@ public class WorkTimeModel {
                     long curTime = System.currentTimeMillis();
                     currentWorkTime = curTime - currentStartTime;
                     notifyListeners();
+                    checkForPeriodicSignal();
+                    checkForEndingSignal();
                 } else {
                     long curTime = System.currentTimeMillis();
                     currentTimeOut = curTime-currentTimeOutStartTime;
@@ -262,6 +266,36 @@ public class WorkTimeModel {
                 listener.OnOverTimeChange(getOverTime());
                 listener.OnPausedChanged(isPaused);
                 listener.OnStartedChanged(isStarted);
+            }
+        }
+    }
+
+    private boolean alreadyCalled;
+    private void checkForPeriodicSignal() {
+        if (setting != null && setting.signalPeriod != null && setting.signalPeriod.getValue() != null) {
+            int period_millis = setting.signalPeriod.getValue() * 60 * 1000;
+            if (currentWorkTime % period_millis < 2000 && !alreadyCalled) {
+                for (IChangeTimeListener listener : listeners) {
+                    listener.OnPeriodicSignalCalled();
+                }
+                alreadyCalled = true;
+            } else {
+                alreadyCalled = false;
+            }
+        }
+    }
+    private boolean endAlreadyCalled;
+    private void checkForEndingSignal() {
+        if (setting != null && setting.endSignalPeriod != null && setting.endSignalPeriod.getValue() != null) {
+            int timeBeforeEnd_millis = setting.endSignalPeriod.getValue() * 60 * 1000;
+
+            if (getWorkDayInMillis() - (commonWorkTime + currentWorkTime) < timeBeforeEnd_millis && !endAlreadyCalled) {
+                endAlreadyCalled = true;
+                for (IChangeTimeListener listener : listeners) {
+                    listener.OnPreEndSignalCalled();
+                }
+            } else {
+                endAlreadyCalled = false;
             }
         }
     }

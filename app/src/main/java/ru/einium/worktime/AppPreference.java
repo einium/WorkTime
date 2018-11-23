@@ -31,6 +31,8 @@ public class AppPreference {
     public MutableLiveData<Integer> friday_s = new MutableLiveData<>();
     public MutableLiveData<Integer> saturday_s = new MutableLiveData<>();
     public MutableLiveData<Integer> sunday_s = new MutableLiveData<>();
+    public MutableLiveData<Integer> signalPeriod = new MutableLiveData<>();
+    public MutableLiveData<Integer> endSignalPeriod = new MutableLiveData<>();
 
     private boolean isLoaded;
 
@@ -46,6 +48,8 @@ public class AppPreference {
         friday_s.setValue(sp.getInt("Friday", defaultTime2));
         saturday_s.setValue(sp.getInt("Saturday", defaultTime3));
         sunday_s.setValue(sp.getInt("Sunday", defaultTime3));
+        signalPeriod.setValue(sp.getInt("signalPeriod", 15));
+        endSignalPeriod.setValue(sp.getInt("endSignalPeriod", 10));
         isLoaded = true;
     }
 
@@ -109,6 +113,20 @@ public class AppPreference {
         this.sunday_s.postValue(sunday);
         SharedPreferences.Editor editor = sp.edit();
         editor.putInt("Sunday", sunday);
+        editor.apply();
+    }
+
+    public void setSignalPeriod(int minutes) {
+        this.signalPeriod.postValue(minutes);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putInt("signalPeriod", minutes);
+        editor.apply();
+    }
+
+    public void setEndSignalPeriod(int minutes) {
+        this.endSignalPeriod.postValue(minutes);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putInt("endSignalPeriod", minutes);
         editor.apply();
     }
 

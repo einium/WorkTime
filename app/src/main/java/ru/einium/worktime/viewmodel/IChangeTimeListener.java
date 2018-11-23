@@ -8,4 +8,6 @@ public interface IChangeTimeListener{
     void OnOverTimeChange(Long time);
     void OnStartedChanged(boolean started);
     void OnPausedChanged(boolean paused);
+    void OnPeriodicSignalCalled();
+    void OnPreEndSignalCalled();
 }

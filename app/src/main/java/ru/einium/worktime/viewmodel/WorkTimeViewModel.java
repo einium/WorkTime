@@ -32,54 +32,62 @@ public class WorkTimeViewModel extends ViewModel {
     public WorkTimeViewModel() {
         Log.d("logtag", "WorkTimeViewModel()");
         model = WorkTimeModel.getInstance();
-          startTimeText.postValue(defValue);
+        startTimeText.postValue(defValue);
         workingTimeText.postValue(defValue);
-            timeOutText.postValue(defValue);
-           stopTimeText.postValue(defValue);
-           overTimeText.postValue(defValue);
+        timeOutText.postValue(defValue);
+        stopTimeText.postValue(defValue);
+        overTimeText.postValue(defValue);
         String time = TimeFormatUtils.convertTimeToStringCorrectly(model.getWorkDayInMillis());
-            workDayText.postValue(time);
-        model.addListener(new IChangeTimeListener(){
-               @Override
-               public void OnStartTimeChange(Long time) {
-                   startTimeText.postValue(convertTimeToString(time, false));
-               }
+        workDayText.postValue(time);
+        model.addListener(new IChangeTimeListener() {
+            @Override
+            public void OnStartTimeChange(Long time) {
+                startTimeText.postValue(convertTimeToString(time, false));
+            }
 
-               @Override
-               public void OnWorkingTimeChange(Long time) {
-                   workingTimeText.postValue(convertTimeToString(time, true));
-               }
+            @Override
+            public void OnWorkingTimeChange(Long time) {
+                workingTimeText.postValue(convertTimeToString(time, true));
+            }
 
-               @Override
-               public void OnTimeOutChange(Long time) {
-                   timeOutText.postValue(convertTimeToString(time, true));
-               }
+            @Override
+            public void OnTimeOutChange(Long time) {
+                timeOutText.postValue(convertTimeToString(time, true));
+            }
 
-               @Override
-               public void OnStopTimeChange(Long time) {
-                   stopTimeText.postValue(convertTimeToString(time, false));
-               }
+            @Override
+            public void OnStopTimeChange(Long time) {
+                stopTimeText.postValue(convertTimeToString(time, false));
+            }
 
-               @Override
-               public void OnOverTimeChange(Long time) {
-                   overTimeText.postValue(convertTimeToString(time, true));
-               }
+            @Override
+            public void OnOverTimeChange(Long time) {
+                overTimeText.postValue(convertTimeToString(time, true));
+            }
 
-               @Override
-               public void OnStartedChanged(boolean started) {
-                   isStarted.postValue(started);
-               }
+            @Override
+            public void OnStartedChanged(boolean started) {
+                isStarted.postValue(started);
+            }
 
-               @Override
-               public void OnPausedChanged(boolean paused) {
-                    isPaused.postValue(paused);
-               }
-           });
+            @Override
+            public void OnPausedChanged(boolean paused) {
+                isPaused.postValue(paused);
+            }
+
+            @Override
+            public void OnPeriodicSignalCalled() {
+            }
+
+            @Override
+            public void OnPreEndSignalCalled() {
+            }
+        });
     }
 
-    public void loadSavedState(){
+    public void loadSavedState() {
         if (model != null) {
-            if (model.getGlobalStartTime() == 0){
+            if (model.getGlobalStartTime() == 0) {
                 Log.d("logtag", "model.loadSavedState()");
                 model.loadSavedState(new TimePreference());
                 String time = TimeFormatUtils.convertTimeToStringCorrectly(model.getWorkDayInMillis());
@@ -98,10 +106,10 @@ public class WorkTimeViewModel extends ViewModel {
             if (serviceListener != null) {
                 serviceListener.startService();
             }
-        }else{
-            if (!model.isPaused){
+        } else {
+            if (!model.isPaused) {
                 model.Pause();
-            }else{
+            } else {
                 model.Resume();
             }
         }
@@ -117,8 +125,8 @@ public class WorkTimeViewModel extends ViewModel {
     }
 
     public void setNewWorkTime(int hourOfDay, int minute) {
-        long workTimeInMillis = hourOfDay*3600000 + minute*60000;
-        if (model != null){
+        long workTimeInMillis = hourOfDay * 3600000 + minute * 60000;
+        if (model != null) {
             model.setWorkTimeInMillis(workTimeInMillis);
             model.saveCurrentState(new TimePreference());
         }
@@ -139,7 +147,7 @@ public class WorkTimeViewModel extends ViewModel {
     }
 
     public int getWorkDayInMillis() {
-        return (int)model.getWorkDayInMillis();
+        return (int) model.getWorkDayInMillis();
     }
 
     public void setStartTime(int hourOfDay, int minute) {
@@ -170,13 +178,13 @@ public class WorkTimeViewModel extends ViewModel {
             model.saveCurrentState(new TimePreference());
 
             startTimeText.setValue(convertTimeToString(0, false));
-            if (serviceListener != null){
+            if (serviceListener != null) {
                 serviceListener.stopService();
             }
         }
     }
 
-    public void setServiceListener(IManageServiceListener listener){
+    public void setServiceListener(IManageServiceListener listener) {
         if (listener != null) {
             serviceListener = listener;
         }

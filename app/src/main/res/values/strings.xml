@@ -5,7 +5,8 @@
     <string name="time_in">Time in</string>
     <string name="time_out">Time out</string>
     <string name="over_time">Over time</string>
-    <string name="default_value">--:--</string>
+    <string name="default_value1">--:--</string>
+    <string name="default_value2">--</string>
     <string name="start">Start</string>
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
@@ -23,4 +24,9 @@
     <string name="friday">Friday: </string>
     <string name="saturday">Saturday: </string>
     <string name="sunday">Sunday: </string>
+    <string name="periodic_signal">Periodic signal: </string>
+    <string name="pre_end_signal">Signal before stop time: </string>
+    <string name="min">min</string>
+    <string name="periodic_signal_description">(3 short vibrates)</string>
+    <string name="ending_signal_description">(1 long vibrate)</string>
 </resources>

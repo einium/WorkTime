@@ -1,7 +1,8 @@
 package ru.einium.worktime.view;
 
+import android.app.Dialog;
 import android.app.TimePickerDialog;
-import android.arch.lifecycle.Observer;
+import android.content.Context;
 import android.content.res.ColorStateList;
 import ru.einium.worktime.databinding.ActivitySettingBinding;
 import android.databinding.DataBindingUtil;
@@ -11,8 +12,8 @@ import android.support.v4.widget.CompoundButtonCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.CompoundButton;
+import android.widget.Button;
+import android.widget.NumberPicker;
 import android.widget.TimePicker;
 
 import ru.einium.worktime.R;
@@ -73,143 +74,97 @@ public class SettingActivity extends AppCompatActivity {
 
     private void setObservers() {
         Log.d("logtag", "            setObservers()");
-        setting.showNotification.observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean b) {
-                if (b != null) {
-                    binding.chbShowNotification.setChecked(b);
-                }
+        setting.showNotification.observe(this, b -> {
+            if (b != null) {
+                binding.chbShowNotification.setChecked(b);
             }
         });
-        setting.closeAppOnReset.observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean b) {
-                if (b != null) {
-                    binding.chbCloseApp.setChecked(b);
-                }
+        setting.closeAppOnReset.observe(this, b -> {
+            if (b != null) {
+                binding.chbCloseApp.setChecked(b);
             }
         });
-        setting.monday_s.observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer i) {
-                if (i != null) {
-                    binding.tvMondayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
-                }
+        setting.monday_s.observe(this, i -> {
+            if (i != null) {
+                binding.tvMondayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
             }
         });
-        setting.tuesday_s.observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer i) {
-                if (i != null) {
-                    binding.tvTuesdayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
-                }
+        setting.tuesday_s.observe(this, i -> {
+            if (i != null) {
+                binding.tvTuesdayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
             }
         });
-        setting.wednesday_s.observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer i) {
-                if (i != null) {
-                    binding.tvWednesdayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
-                }
+        setting.wednesday_s.observe(this, i -> {
+            if (i != null) {
+                binding.tvWednesdayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
             }
         });
-        setting.thursday_s.observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer i) {
-                if (i != null) {
-                    binding.tvThursdayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
-                }
+        setting.thursday_s.observe(this, i -> {
+            if (i != null) {
+                binding.tvThursdayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
             }
         });
-        setting.friday_s.observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer i) {
-                if (i != null) {
-                    binding.tvFridayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
-                }
+        setting.friday_s.observe(this, i -> {
+            if (i != null) {
+                binding.tvFridayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
             }
         });
-        setting.saturday_s.observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer i) {
-                if (i != null) {
-                    binding.tvSaturdayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
-                }
+        setting.saturday_s.observe(this, i -> {
+            if (i != null) {
+                binding.tvSaturdayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
             }
         });
-        setting.sunday_s.observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer i) {
-                if (i != null) {
-                    binding.tvSundayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
-                }
+        setting.sunday_s.observe(this, i -> {
+            if (i != null) {
+                binding.tvSundayValue.setText(TimeFormatUtils.convertTimeToStringCorrectly(i*1000));
+            }
+        });
+        setting.signalPeriod.observe(this, b -> {
+            if (b != null) {
+                binding.tvPeriodicSignalValue.setText(String.valueOf(b));
+            }
+        });
+        setting.endSignalPeriod.observe(this, b -> {
+            if (b != null) {
+                binding.tvPreEndSignalValue.setText(String.valueOf(b));
             }
         });
     }
 
     private void addClickListeners() {
         Log.d("logtag", "            addClickListeners()");
-        binding.chbShowNotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setting.setShowNotification(isChecked);
-            }
+        binding.chbShowNotification.setOnCheckedChangeListener((buttonView, isChecked) -> setting.setShowNotification(isChecked));
+        binding.chbCloseApp.setOnCheckedChangeListener((buttonView, isChecked) -> setting.setCloseAppOnReset(isChecked));
+        binding.tvMondayValue.setOnClickListener(v -> {
+            currentDay = TimeFormatUtils.DayOfWeek.monday;
+            showTimePickerDialog();
         });
-        binding.chbCloseApp.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setting.setCloseAppOnReset(isChecked);
-            }
+        binding.tvTuesdayValue.setOnClickListener(v -> {
+            currentDay = TimeFormatUtils.DayOfWeek.tuesday;
+            showTimePickerDialog();
         });
-        binding.tvMondayValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentDay = TimeFormatUtils.DayOfWeek.monday;
-                showTimePickerDialog();
-            }
+        binding.tvWednesdayValue.setOnClickListener(v -> {
+            currentDay = TimeFormatUtils.DayOfWeek.wednesday;
+            showTimePickerDialog();
         });
-        binding.tvTuesdayValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentDay = TimeFormatUtils.DayOfWeek.tuesday;
-                showTimePickerDialog();
-            }
+        binding.tvThursdayValue.setOnClickListener(v -> {
+            currentDay = TimeFormatUtils.DayOfWeek.thursday;
+            showTimePickerDialog();
         });
-        binding.tvWednesdayValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentDay = TimeFormatUtils.DayOfWeek.wednesday;
-                showTimePickerDialog();
-            }
+        binding.tvFridayValue.setOnClickListener(v -> {
+            currentDay = TimeFormatUtils.DayOfWeek.friday;
+            showTimePickerDialog();
         });
-        binding.tvThursdayValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentDay = TimeFormatUtils.DayOfWeek.thursday;
-                showTimePickerDialog();
-            }
+        binding.tvSaturdayValue.setOnClickListener(v -> {
+            currentDay = TimeFormatUtils.DayOfWeek.saturday;
+            showTimePickerDialog();
         });
-        binding.tvFridayValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentDay = TimeFormatUtils.DayOfWeek.friday;
-                showTimePickerDialog();
-            }
+        binding.tvSundayValue.setOnClickListener(v -> {
+            currentDay = TimeFormatUtils.DayOfWeek.sunday;
+            showTimePickerDialog();
         });
-        binding.tvSaturdayValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentDay = TimeFormatUtils.DayOfWeek.saturday;
-                showTimePickerDialog();
-            }
-        });
-        binding.tvSundayValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentDay = TimeFormatUtils.DayOfWeek.sunday;
-                showTimePickerDialog();
-            }
-        });
+        binding.tvPeriodicSignalValue.setOnClickListener((v)-> showPeriodicSignalValuePickerDialog(this));
+        binding.tvPreEndSignalValue.setOnClickListener((v)->showEndSignalValuePickerDialog(this));
     }
 
     void showTimePickerDialog() {
@@ -302,5 +257,44 @@ public class SettingActivity extends AppCompatActivity {
                     break;
             }
         }
+    }
+
+    private void showPeriodicSignalValuePickerDialog(Context context) {
+        String title = getResources().getString(R.string.periodic_signal);
+        int currentValue = 0;
+        if (setting.signalPeriod != null && setting.signalPeriod.getValue() != null)
+            currentValue = setting.signalPeriod.getValue();
+        OnNumberSelectedListener listener = value -> setting.setSignalPeriod(value);
+        showNumberPickerDialog(context, title, currentValue, listener);
+    }
+    private void showEndSignalValuePickerDialog(Context context) {
+        String title = getResources().getString(R.string.pre_end_signal);
+        int currentValue = 0;
+        if (setting.endSignalPeriod != null && setting.endSignalPeriod.getValue() != null)
+            currentValue = setting.endSignalPeriod.getValue();
+        OnNumberSelectedListener listener = value -> setting.setEndSignalPeriod(value);
+        showNumberPickerDialog(context, title, currentValue, listener);
+    }
+
+    private void showNumberPickerDialog(Context context, String title, int value, OnNumberSelectedListener listener){
+        final Dialog numberPikerDialog = new Dialog(context);
+        numberPikerDialog.setTitle(title);
+        numberPikerDialog.setContentView(R.layout.number_picker);
+        Button btnOk = numberPikerDialog.findViewById(R.id.btnOk);
+        final NumberPicker np = numberPikerDialog.findViewById(R.id.numberPicker1);
+        np.setMaxValue(120);
+        np.setMinValue(0);
+        np.setValue(value);
+        np.setWrapSelectorWheel(true);
+        btnOk.setOnClickListener(v -> {
+            int newPeriod = np.getValue();
+            listener.onNumberSelected(newPeriod);
+            numberPikerDialog.dismiss();
+        });
+        numberPikerDialog.show();
+    }
+
+    private interface OnNumberSelectedListener{
+        void onNumberSelected(int value);
     }
 }
