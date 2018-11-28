@@ -4,6 +4,7 @@ import android.util.Log;
 
 import ru.einium.worktime.AppPreference;
 import ru.einium.worktime.viewmodel.IChangeTimeListener;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,13 +18,15 @@ import java.util.TimerTask;
 public class WorkTimeModel {
     private final Object locker = new Object();
     private static WorkTimeModel currentModel;
-    public static WorkTimeModel getInstance(){
+
+    public static WorkTimeModel getInstance() {
         if (currentModel == null) {
             currentModel = new WorkTimeModel();
             return currentModel;
         }
         return currentModel;
     }
+
     private AppPreference setting = AppPreference.getInstance();
     private long customWorkTime = 0;
     private List<IChangeTimeListener> listeners = new ArrayList<>();
@@ -89,20 +92,21 @@ public class WorkTimeModel {
         int day = calendar.get(Calendar.DAY_OF_WEEK);
         switch (day) {
             case Calendar.MONDAY:
-                return setting.getMondayInSec()*1000L;
+                return setting.getMondayInSec() * 1000L;
             case Calendar.TUESDAY:
-                return setting.getTuesdayInSec()*1000L;
+                return setting.getTuesdayInSec() * 1000L;
             case Calendar.WEDNESDAY:
-                return setting.getWednesdayInSec()*1000L;
+                return setting.getWednesdayInSec() * 1000L;
             case Calendar.THURSDAY:
-                return setting.getThursdayInSec()*1000L;
+                return setting.getThursdayInSec() * 1000L;
             case Calendar.FRIDAY:
-                return setting.getFridayInSec()*1000L;
+                return setting.getFridayInSec() * 1000L;
             case Calendar.SATURDAY:
-                return setting.getSaturdayInSec()*1000L;
+                return setting.getSaturdayInSec() * 1000L;
             case Calendar.SUNDAY:
-                return setting.getSundayInSec()*1000L;
-            default: return 0;
+                return setting.getSundayInSec() * 1000L;
+            default:
+                return 0;
         }
     }
 
@@ -115,7 +119,7 @@ public class WorkTimeModel {
         long startTimeDiff = globalStartTime - startTimeInMillis;
         globalStartTime = startTimeInMillis;
         if (isStarted) {
-            if (!isPaused){
+            if (!isPaused) {
                 if (commonWorkTime == 0) {
                     currentStartTime = startTimeInMillis;
                 } else {
@@ -153,17 +157,17 @@ public class WorkTimeModel {
         commonTimeOut = 0;
         currentTimeOut = 0;
 
-        if (tTask != null){
+        if (tTask != null) {
             tTask.cancel();
             tTask = null;
         }
         notifyListeners();
     }
 
-    private TimerTask createTimerTask(){
+    private TimerTask createTimerTask() {
         return new TimerTask() {
             public void run() {
-                if (!isPaused){
+                if (!isPaused) {
                     long curTime = System.currentTimeMillis();
                     currentWorkTime = curTime - currentStartTime;
                     notifyListeners();
@@ -173,7 +177,7 @@ public class WorkTimeModel {
                         checkForEndingSignal();
                 } else {
                     long curTime = System.currentTimeMillis();
-                    currentTimeOut = curTime-currentTimeOutStartTime;
+                    currentTimeOut = curTime - currentTimeOutStartTime;
                     notifyListeners();
                 }
             }
@@ -182,7 +186,7 @@ public class WorkTimeModel {
 
     public void saveCurrentState(TimePreference pref) {
         Log.d("logtag", "WorkTimeModel saveCurrentState()");
-        if (isStarted){
+        if (isStarted) {
             pref.saveCurrentState(true,
                     globalStartTime,
                     currentStartTime,
@@ -240,15 +244,15 @@ public class WorkTimeModel {
         return !savedDate.equals(today);
     }
 
-    public void addListener(IChangeTimeListener listener){
+    public void addListener(IChangeTimeListener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(IChangeTimeListener listener){
+    public void removeListener(IChangeTimeListener listener) {
         listeners.remove(listener);
     }
 
-    public long getGlobalStartTime(){
+    public long getGlobalStartTime() {
         return globalStartTime;
     }
 
@@ -273,32 +277,48 @@ public class WorkTimeModel {
     }
 
     private boolean alreadyCalled;
+
     private void checkForPeriodicSignal() {
-        if (setting != null && setting.signalPeriod != null && setting.signalPeriod.getValue() != null) {
-            int period_millis = setting.signalPeriod.getValue() * 60 * 1000;
-            if (currentWorkTime % period_millis < 2000 && !alreadyCalled) {
+        if (isTimeForPeriodicSignal()) {
+            if (!alreadyCalled) {
                 for (IChangeTimeListener listener : listeners) {
                     listener.OnPeriodicSignalCalled();
                 }
                 alreadyCalled = true;
-            } else {
-                alreadyCalled = false;
             }
+        } else {
+            alreadyCalled = false;
         }
     }
-    private boolean endAlreadyCalled;
-    private void checkForEndingSignal() {
-        if (setting != null && setting.endSignalPeriod != null && setting.endSignalPeriod.getValue() != null) {
-            int timeBeforeEnd_millis = setting.endSignalPeriod.getValue() * 60 * 1000;
 
-            if (getWorkDayInMillis() - (commonWorkTime + currentWorkTime) < timeBeforeEnd_millis && !endAlreadyCalled) {
-                endAlreadyCalled = true;
+    private boolean isTimeForPeriodicSignal() {
+        if (setting != null && setting.signalPeriod != null && setting.signalPeriod.getValue() != null) {
+            int period_millis = setting.signalPeriod.getValue() * 60 * 1000;
+            return currentWorkTime % period_millis < 2000;
+        }
+        return false;
+    }
+
+    private boolean endAlreadyCalled;
+
+    private void checkForEndingSignal() {
+        if (isTimeForEndSignal()) {
+            if (!endAlreadyCalled) {
                 for (IChangeTimeListener listener : listeners) {
                     listener.OnPreEndSignalCalled();
                 }
-            } else {
-                endAlreadyCalled = false;
+                endAlreadyCalled = true;
             }
+        } else {
+            endAlreadyCalled = false;
         }
+    }
+
+    private boolean isTimeForEndSignal() {
+        if (setting != null && setting.endSignalPeriod != null && setting.endSignalPeriod.getValue() != null) {
+            int timeBeforeEnd_millis = setting.endSignalPeriod.getValue() * 60 * 1000;
+            return getWorkDayInMillis() - (commonWorkTime + currentWorkTime) < timeBeforeEnd_millis;
+        }
+        return false;
     }
 }

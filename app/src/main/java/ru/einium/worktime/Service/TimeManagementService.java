@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
@@ -99,7 +100,7 @@ public class TimeManagementService extends Service {
     };
     private Observer<Boolean> changeShowNotificationObserver = b -> {
         if (b != null && !b) {
-            dismisNotification();
+            dismissNotification();
         }
     };
 
@@ -129,12 +130,25 @@ public class TimeManagementService extends Service {
     }
 
     private void showNotification() {
+
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (notificationManager != null) {
+        if (notificationManager != null && isScreenOn()) {
             Notification notification = createNotification(notificationManager);
             notificationManager.notify(notificationID, notification);
         }
     }
+    private boolean isScreenOn() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (pm != null) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT_WATCH) {
+                return pm.isInteractive();
+            } else {
+                return pm.isScreenOn();
+            }
+        }
+        return true;
+    }
+
     private Notification createNotification(NotificationManager notificationManager){
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH);
@@ -178,7 +192,7 @@ public class TimeManagementService extends Service {
         return notificationLayout;
     }
 
-    private void dismisNotification() {
+    private void dismissNotification() {
         try {
             NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager != null) {
@@ -208,33 +222,13 @@ public class TimeManagementService extends Service {
         unregisterReceiver(receiver);
         model.removeListener(listener);
         setting.showNotification.removeObserver(changeShowNotificationObserver);
-
-        /*if (model.isStarted) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(new Intent(this, TimeManagementService.class));
-            } else {
-                startService(new Intent(this, TimeManagementService.class));
-            }
-        } else {
-            dismisNotification();
-        }*/
+        dismissNotification();
     }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
         Log.i("logtag", "TimeManagementService onTaskRemoved");
-        /*model.removeListener(listener);
-        setting.showNotification.removeObserver(changeShowNotificationObserver);
-        if (model.isStarted) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(new Intent(this, TimeManagementService.class));
-            } else {
-                startService(new Intent(this, TimeManagementService.class));
-            }
-        } else {
-            dismisNotification();
-        }*/
 
         Intent restartService = new Intent(getApplicationContext(), this.getClass());
         restartService.setPackage(getPackageName());
