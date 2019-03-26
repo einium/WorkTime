@@ -48,17 +48,21 @@ public class TimeManagementService extends Service {
 
         @Override
         public void OnWorkingTimeChange(Long time) {
-            workTime = convertTimeToString(time);
-            if (setting.isShowNotification()) {
-                showNotification();
+            if ((time / 1000)%60 == 0) {
+                workTime = convertTimeToString(time);
+                if (setting.isShowNotification()) {
+                    showNotification();
+                }
             }
         }
 
         @Override
         public void OnTimeOutChange(Long time) {
-            timeOut = convertTimeToString(time);
-            if (setting.isShowNotification()) {
-                showNotification();
+            if ((time / 1000) % 60 == 0) {
+                timeOut = convertTimeToString(time);
+                if (setting.isShowNotification()) {
+                    showNotification();
+                }
             }
         }
 
@@ -130,7 +134,6 @@ public class TimeManagementService extends Service {
     }
 
     private void showNotification() {
-
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (notificationManager != null && isScreenOn()) {
             Notification notification = createNotification(notificationManager);
@@ -209,8 +212,8 @@ public class TimeManagementService extends Service {
     }
 
     private String convertTimeToString(long time) {
-        if (time == 0) return "--:--:--";
-        DateFormat formatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+        if (time == 0) return "--:--";
+        DateFormat formatter = new SimpleDateFormat("HH:mm", Locale.getDefault());
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         return formatter.format(new Date(time));
     }
@@ -219,8 +222,12 @@ public class TimeManagementService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d("logtag", "TimeManagementService onDestroy()");
-        unregisterReceiver(receiver);
-        model.removeListener(listener);
+        if (receiver != null) {
+            unregisterReceiver(receiver);
+        }
+        if (listener != null) {
+            model.removeListener(listener);
+        }
         setting.showNotification.removeObserver(changeShowNotificationObserver);
         dismissNotification();
     }

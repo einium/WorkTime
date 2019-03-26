@@ -141,8 +141,9 @@ public class WorkTimeModel {
         if (globalStartTime == 0) return 0;
         if (commonWorkTime + currentWorkTime > getWorkDayInMillis()) {
             return commonWorkTime + currentWorkTime - getWorkDayInMillis();
+        } else {
+            return commonWorkTime + currentWorkTime - getWorkDayInMillis();
         }
-        return 0;
     }
 
     public void reset() {
@@ -266,7 +267,7 @@ public class WorkTimeModel {
                 listener.OnStartTimeChange(globalStartTime);
                 listener.OnWorkingTimeChange(commonWorkTime + currentWorkTime);
                 listener.OnTimeOutChange(commonTimeOut + currentTimeOut);
-                if (getOverTime() == 0) {
+                if (getOverTime() <= 0) {
                     listener.OnStopTimeChange(getStopTime());
                 }
                 listener.OnOverTimeChange(getOverTime());

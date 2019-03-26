@@ -62,6 +62,7 @@ public class WorkTimeViewModel extends ViewModel {
 
             @Override
             public void OnOverTimeChange(Long time) {
+                Log.d("logtag", "WorkTimeViewModel OnOverTimeChange() time: " + time);
                 overTimeText.postValue(convertTimeToString(time, true));
             }
 
@@ -118,10 +119,14 @@ public class WorkTimeViewModel extends ViewModel {
 
     private String convertTimeToString(long time, boolean setTimeZone) {
         if (time == 0) return defValue;
-
+        String prefix = "";
+        if (time < 0) {
+            prefix = "- ";
+            time = time*(-1);
+        }
         DateFormat formatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         if (setTimeZone) formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return formatter.format(new Date(time));
+        return prefix + formatter.format(new Date(time));
     }
 
     public void setNewWorkTime(int hourOfDay, int minute) {
