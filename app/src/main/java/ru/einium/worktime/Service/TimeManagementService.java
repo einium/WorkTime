@@ -48,21 +48,17 @@ public class TimeManagementService extends Service {
 
         @Override
         public void OnWorkingTimeChange(Long time) {
-            if ((time / 1000)%60 == 0) {
-                workTime = convertTimeToString(time);
-                if (setting.isShowNotification()) {
-                    showNotification();
-                }
+            workTime = convertTimeToString(time);
+            if (setting.isShowNotification()) {
+                showNotification();
             }
         }
 
         @Override
         public void OnTimeOutChange(Long time) {
-            if ((time / 1000) % 60 == 0) {
-                timeOut = convertTimeToString(time);
-                if (setting.isShowNotification()) {
-                    showNotification();
-                }
+            timeOut = convertTimeToString(time);
+            if (setting.isShowNotification()) {
+                showNotification();
             }
         }
 
@@ -124,9 +120,6 @@ public class TimeManagementService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("logtag", "TimeManagementService onStartCommand()");
-        //NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        //Notification startNotification = createNotification(notificationManager);
-        //startForeground(notificationID, startNotification);
 
         receiver = new PressNotificationButtonReceiver();
         registerReceiver(receiver, new IntentFilter("Press_time_action_button"));

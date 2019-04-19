@@ -137,15 +137,6 @@ public class WorkTimeModel {
         return globalStartTime + getWorkDayInMillis() + commonTimeOut + currentTimeOut;
     }
 
-    private long getOverTime() {
-        if (globalStartTime == 0) return 0;
-        if (commonWorkTime + currentWorkTime > getWorkDayInMillis()) {
-            return commonWorkTime + currentWorkTime - getWorkDayInMillis();
-        } else {
-            return commonWorkTime + currentWorkTime - getWorkDayInMillis();
-        }
-    }
-
     public void reset() {
         Log.d("logtag", "WorkTimeModel reset()");
         isStarted = false;
@@ -275,6 +266,11 @@ public class WorkTimeModel {
                 listener.OnStartedChanged(isStarted);
             }
         }
+    }
+
+    private long getOverTime() {
+        if (globalStartTime == 0) return 0;
+        return commonWorkTime + currentWorkTime - getWorkDayInMillis() - 1000;
     }
 
     private boolean alreadyCalled;
