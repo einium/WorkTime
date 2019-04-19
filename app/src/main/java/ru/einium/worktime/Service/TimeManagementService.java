@@ -205,8 +205,8 @@ public class TimeManagementService extends Service {
     }
 
     private String convertTimeToString(long time) {
-        if (time == 0) return "--:--";
-        DateFormat formatter = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        if (time == 0) return "--:--:--";
+        DateFormat formatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         return formatter.format(new Date(time));
     }
