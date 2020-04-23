@@ -1,6 +1,6 @@
 package ru.einium.worktime;
 
-import android.arch.lifecycle.MutableLiveData;
+import androidx.lifecycle.MutableLiveData;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
